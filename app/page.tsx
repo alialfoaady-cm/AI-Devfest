@@ -188,7 +188,7 @@ export default function FindPage() {
           setPicked(null);
           clearError();
         }}
-        className="pop m-auto w-[min(92vw,26rem)] overflow-hidden rounded-3xl border border-line bg-surface p-0 text-ink backdrop:bg-black/60"
+        className="pop m-auto w-[min(92vw,26rem)] overflow-y-auto overscroll-contain rounded-3xl border border-line bg-surface p-0 text-ink backdrop:bg-black/60"
       >
         {picked && (
           <>
