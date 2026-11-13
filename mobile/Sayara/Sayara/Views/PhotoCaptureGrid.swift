@@ -109,7 +109,8 @@ struct PhotoCaptureGrid: View {
         if dark {
             return Badge(symbol: "exclamationmark.triangle.fill", text: "\(slot.label) · too dark", ink: .black, fill: Theme.unsure, border: Theme.unsure)
         }
-        return Badge(symbol: "checkmark.circle.fill", text: slot.label, ink: Theme.onGreen, fill: Theme.green, border: Theme.green.opacity(0.6))
+        // Neutral on purpose: a photo being added says nothing about damage. Green ✓ is only the check's verdict.
+        return Badge(symbol: "camera.fill", text: slot.label, ink: .white, fill: .black.opacity(0.6), border: Theme.line)
     }
 }
 
