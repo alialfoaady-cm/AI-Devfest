@@ -4,6 +4,9 @@ import { AIRPORTS } from "./config";
 import { tripDays } from "./rules";
 import type { Pin, State } from "./types";
 
+// shortcut: the make is the first word after the year, so "Land Rover" shows as "Land". Store the make on the car when that matters.
+export const makeOf = (model: string) => model.replace(/^\d{4}\s+/, "").split(" ")[0];
+
 export type NewCar = { model: string; seats: number; airport: string; from: string; to: string; photo?: string };
 
 export function listCar(state: State, ownerId: string, car: NewCar): State {

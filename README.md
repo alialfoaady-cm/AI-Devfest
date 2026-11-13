@@ -138,6 +138,7 @@ returnCar(state, bookingId)                      // marks it returned, pays the 
 | Phone photos | `<input type="file" accept="image/*" capture>`, shrunk in the browser to 720 px on the long edge before upload | Built |
 | AI, mock mode | `lib/inspection/mock.ts` returns canned answers so the flow runs with no credentials. This is the default, and the only mode where the drawn sample photos are offered | Built |
 | AI, real | IBM watsonx.ai, called only from the server in `lib/inspection/watsonx.ts` | **Not built yet.** The model is not chosen |
+| AI search | "Describe what you're looking for" on Find a car. `/api/search` turns the sentence into filters (airport, seats, make, trip length). Until the watsonx adapter exists (`lib/search/watsonx.ts`, chosen with `SEARCH_PROVIDER=watsonx`), a word matcher stands in (`lib/search/describe.ts`) | Stand-in built; **IBM not connected** |
 | Map | Google Maps JavaScript API for the parking pin (`components/ParkingMap.tsx`). The owner drags the map under a fixed pin; the borrower sees the pin and the spot number | Built. Needs `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` |
 
 An earlier plan used a plain HTML and JavaScript app, and before that Google Gemini and Firebase. Both are replaced. The first Next.js build kept everything in the browser's localStorage with two built-in demo users; that is replaced by real accounts and the server-side data file.
