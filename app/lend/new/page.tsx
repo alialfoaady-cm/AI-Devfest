@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CarPhotoPicker } from "@/components/CarPhotoPicker";
+import { DateRange } from "@/components/DateRange";
 import { Select } from "@/components/Select";
-import { Notice, Segment, btnPrimary, field, pageTitle, searchBar, segmentControl } from "@/components/ui";
+import { Notice, btnPrimary, field, pageTitle, searchBar } from "@/components/ui";
 import { AIRPORT_OPTIONS } from "@/lib/config";
 import { isoDay } from "@/lib/format";
 import { act, useStore, useTask } from "@/lib/store";
@@ -67,12 +68,7 @@ export default function ListCarPage() {
           </div>
           <div>
             <div className={searchBar}>
-              <Segment label="You fly out">
-                <input type="date" required className={segmentControl} value={car.from} onChange={(event) => change({ from: event.target.value })} />
-              </Segment>
-              <Segment label="You land back">
-                <input type="date" required className={segmentControl} value={car.to} min={car.from} onChange={(event) => change({ to: event.target.value })} />
-              </Segment>
+              <DateRange labels={["You fly out", "You land back"]} from={car.from} to={car.to} onChange={(from, to) => change({ from, to })} />
             </div>
             <p className="mt-2 text-sm text-ink-soft">Nobody can book past the day you land. The car is back before you are.</p>
           </div>

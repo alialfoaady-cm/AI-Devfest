@@ -2,22 +2,23 @@
 /* eslint-disable @next/next/no-img-element -- photos are data URLs or local samples; next/image adds nothing */
 
 // The screen judges look at longest: every pickup photo next to its return photo, with what the
-// AI flagged. The AI flags and describes. The owner confirms or disputes. Nothing here moves credits.
+// AI flagged. The AI flags and describes. The owner confirms or disputes. Nothing here moves credits:
+// it says who pays for confirmed damage, which depends on whether the borrower bought cover.
 
-import { MIN_DAMAGE_CONFIDENCE } from "@/lib/config";
+import { KM_PER_MILE, MIN_DAMAGE_CONFIDENCE } from "@/lib/config";
 import { findingVerdict, kmDriven, slotVerdict, type Verdict } from "@/lib/inspection/verdict";
 import { SLOT_LABELS, SLOTS, type Damage, type Inspection, type OwnerDecision, type Slot } from "@/lib/types";
 import { card, heading } from "../ui";
 import { VERDICT, VERDICT_ORDER, VerdictPill } from "./verdicts";
 
 const percent = (value: number) => `${Math.round(value * 100)}%`;
-const km = (value: number) => `${value.toLocaleString("en-US")} km`;
+const miles = (km: number) => `${Math.round(km / KM_PER_MILE).toLocaleString("en-US")} mi`;
 
 function Pair({ before, after, label }: { before: string; after: string; label: string }) {
   const photo = (src: string, caption: string) => (
-    <figure>
-      <img src={src} alt={`${label} at ${caption.toLowerCase()}`} className="aspect-[4/3] w-full rounded-lg bg-surface object-cover" />
-      <figcaption className="mt-1 text-sm text-ink-soft">{caption}</figcaption>
+    <figure className="relative">
+      <img src={src} alt={`${label} at ${caption.toLowerCase()}`} className="aspect-[4/3] w-full rounded-xl border border-line bg-surface-2 object-cover" />
+      <figcaption className="absolute left-1.5 top-1.5 rounded-full bg-black/65 px-2 py-0.5 text-xs font-bold text-white">{caption}</figcaption>
     </figure>
   );
   return (
@@ -33,12 +34,15 @@ function Finding({
   decision,
   canDecide,
   ownerName,
+  payer,
   onDecide,
 }: {
   damage: Damage;
   decision: OwnerDecision | undefined;
   canDecide: boolean;
   ownerName: string;
+  /** Who pays for confirmed damage, as a sentence for whoever is reading. */
+  payer: string;
   onDecide: (decision: OwnerDecision) => void;
 }) {
   const flagged = findingVerdict(damage) === "flagged";
@@ -47,8 +51,8 @@ function Finding({
       type="button"
       aria-pressed={decision === value}
       onClick={() => onDecide(value)}
-      className={`h-12 rounded-lg px-4 font-medium transition-[background-color,scale] duration-150 ease-out active:scale-[0.98] ${
-        decision === value ? pressed : "bg-surface text-ink hover:bg-surface-2"
+      className={`h-12 rounded-xl border px-4 font-semibold transition-[background-color,border-color,scale] duration-150 ease-out active:scale-[0.98] ${
+        decision === value ? pressed : "border-line bg-surface text-ink hover:border-ink-soft"
       }`}
     >
       {label}
@@ -56,8 +60,8 @@ function Finding({
   );
 
   return (
-    <div className="mt-4 border-t border-line pt-4">
-      <p className="text-lg font-bold">
+    <div className="mt-3 rounded-xl bg-surface-2 p-3.5">
+      <p className={`text-lg font-bold ${flagged ? "text-red" : "text-amber"}`}>
         <span className="capitalize">{damage.type}</span>, {damage.location}
       </p>
       <p className="text-ink-soft">Severity: {damage.severity}.</p>
@@ -87,16 +91,18 @@ function Finding({
       {canDecide ? (
         <>
           <div className="mt-4 grid grid-cols-2 gap-2">
-            {choice("confirmed", "Confirm damage", "bg-red text-canvas")}
-            {choice("disputed", "Dispute flag", "bg-ink text-canvas")}
+            {choice("confirmed", "Confirm damage", "border-transparent bg-red text-canvas")}
+            {choice("disputed", "Dispute flag", "border-transparent bg-green text-on-green")}
           </div>
           <p className="mt-2 text-sm text-ink-soft" aria-live="polite">
-            {decision ? "Recorded. No credits move: people settle damage, not the AI." : "Your call. The AI only flags what it sees."}
+            {decision === "confirmed" && `Recorded. ${payer}`}
+            {decision === "disputed" && "Recorded. Nobody pays for a disputed flag."}
+            {!decision && "Your call. The AI only flags what it sees."}
           </p>
         </>
       ) : (
         <p className="mt-4 font-medium">
-          {decision === "confirmed" && `${ownerName} confirmed this as damage.`}
+          {decision === "confirmed" && `${ownerName} confirmed this as damage. ${payer}`}
           {decision === "disputed" && `${ownerName} disputed this flag.`}
           {!decision && `Waiting for ${ownerName} to confirm or dispute.`}
         </p>
@@ -109,12 +115,17 @@ export function ReturnReport({
   pickup,
   ret,
   ownerName,
+  borrowerName,
+  insured,
   canDecide,
   onDecide,
 }: {
   pickup: Inspection;
   ret: Inspection;
   ownerName: string;
+  borrowerName: string;
+  /** The borrower bought cover for this trip. */
+  insured: boolean;
   canDecide: boolean;
   onDecide: (findingKey: string, decision: OwnerDecision) => void;
 }) {
@@ -127,6 +138,10 @@ export function ReturnReport({
     (a, b) => VERDICT_ORDER.indexOf(verdictOf(a)) - VERDICT_ORDER.indexOf(verdictOf(b)),
   );
   const unchanged = SLOTS.filter((slot) => verdictOf(slot) === "clear");
+  // The report is shown to the owner (who can decide) and to the borrower.
+  const payer = insured
+    ? "This trip is insured, so Sayara pays for the repair."
+    : `This trip is not insured, so ${canDecide ? borrowerName : "you"} ${canDecide ? "pays" : "pay"} for the repair.`;
   const dash = results.dashboard;
   const driven = kmDriven(dash);
 
@@ -144,27 +159,20 @@ export function ReturnReport({
         </p>
       </div>
 
-      <div className={`${card} flex flex-wrap items-center justify-between gap-4 p-4`}>
-        <ul className="flex flex-wrap gap-2">
-          {VERDICT_ORDER.map((verdict) => (
-            <li key={verdict}>
-              <VerdictPill verdict={verdict} count={count(verdict)} />
-            </li>
-          ))}
-        </ul>
-        <dl className="flex gap-6">
-          {[
-            ["Driven", driven != null ? km(driven) : "Not read"],
-            ["Odometer", dash?.odometer_km != null ? km(dash.odometer_km) : "Not read"],
-            ["Fuel", dash?.fuel_level ?? "Not read"],
-          ].map(([term, value]) => (
-            <div key={term}>
-              <dt className="text-sm text-ink-soft">{term}</dt>
-              <dd className="text-lg font-bold leading-tight tabular-nums">{value}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
+      {/* One tile per number, as on the phone. A count is coloured only when it is not zero. */}
+      <dl className="grid grid-cols-3 gap-2 lg:grid-cols-6">
+        {[
+          ["Driven", driven != null ? miles(driven) : "Not read", ""],
+          ["Odometer", dash?.odometer_km != null ? miles(dash.odometer_km) : "Not read", ""],
+          ["Fuel", dash?.fuel_level ?? "Not read", ""],
+          ...VERDICT_ORDER.map((verdict) => [VERDICT[verdict].short, String(count(verdict)), count(verdict) > 0 ? VERDICT[verdict].text : ""]),
+        ].map(([term, value, colour]) => (
+          <div key={term} className="flex flex-col-reverse items-center rounded-xl bg-surface px-2 py-2.5 text-center">
+            <dt className="text-sm text-ink-soft">{term}</dt>
+            <dd className={`text-xl font-bold leading-tight tabular-nums ${colour}`}>{value}</dd>
+          </div>
+        ))}
+      </dl>
 
       <ul className="grid items-start gap-3 lg:grid-cols-2">
         {toReview.map((slot) => {
@@ -191,6 +199,7 @@ export function ReturnReport({
                     decision={ret.ownerDecision[key]}
                     canDecide={canDecide}
                     ownerName={ownerName}
+                    payer={payer}
                     onDecide={(decision) => onDecide(key, decision)}
                   />
                 );

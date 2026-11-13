@@ -4,7 +4,7 @@
 import { listCar, setParking } from "../cars";
 import { parseInspectionResult } from "../inspection/validate";
 import { decideFinding, savePickup, saveReturn } from "../inspections";
-import { book } from "../rules";
+import { book, cancelBooking, insureTrip } from "../rules";
 import { SLOTS, type InspectionResult, type Photos, type Slot, type State } from "../types";
 import { savePhoto } from "./db";
 
@@ -22,6 +22,9 @@ function dates(payload: Payload): { from: string; to: string } {
 }
 
 const text = (value: unknown) => (typeof value === "string" ? value : "");
+
+/** How many credits to put towards a price. Left out means all of it; the rules check the range. */
+const creditsUsed = (payload: Payload) => (payload.creditsUsed === undefined ? undefined : Number(payload.creditsUsed));
 
 /** A photo is a data URL from the camera. In mock mode the drawn samples are allowed too. */
 async function photo(value: unknown): Promise<string> {
@@ -47,8 +50,12 @@ function myBooking(state: State, me: string, bookingId: unknown) {
 const HANDLERS: Record<string, Handler> = {
   book: (state, me, payload) => {
     const { from, to } = dates(payload);
-    return book(state, me, text(payload.carId), from, to);
+    return book(state, me, text(payload.carId), from, to, creditsUsed(payload));
   },
+
+  insure: (state, me, payload) => insureTrip(state, me, text(payload.bookingId), creditsUsed(payload)),
+
+  cancel: (state, me, payload) => cancelBooking(state, me, text(payload.bookingId), creditsUsed(payload)),
 
   listCar: async (state, me, payload) => {
     const car = (payload.car ?? {}) as Payload;
@@ -110,12 +117,24 @@ export function applyAction(state: State, me: string, type: unknown, payload: Pa
  * photos and flags are only for the two people on that trip; nobody sees another person's balance.
  */
 export function viewFor(state: State, me: string): State {
+  // Not signed in ("" for me): enough to browse cars and see which days are taken, and nothing about people
+  // beyond an owner's first name.
+  if (!me) {
+    const owners = new Set(state.cars.map((car) => car.ownerId));
+    return {
+      users: state.users.filter((user) => owners.has(user.id)).map((user) => ({ ...user, name: user.name.split(" ")[0], credits: 0 })),
+      cars: state.cars.map((car) => ({ ...car, pin: undefined, spot: undefined })),
+      bookings: state.bookings.map(({ id, carId, from, to, days, status }) => ({ id, carId, from, to, days, status, userId: "" })),
+      inspections: [],
+    };
+  }
   const mine = (carId: string) => state.cars.some((car) => car.id === carId && car.ownerId === me);
   const booked = (carId: string) => state.bookings.some((b) => b.carId === carId && b.userId === me);
   return {
     users: state.users.map((user) => (user.id === me ? user : { ...user, credits: 0 })),
     cars: state.cars.map((car) => (mine(car.id) || booked(car.id) ? car : { ...car, pin: undefined, spot: undefined })),
-    bookings: state.bookings,
+    // Everyone needs the days a car is taken. What a trip cost, its miles and its cover are for its two people.
+    bookings: state.bookings.map((b) => (b.userId === me || mine(b.carId) ? b : { ...b, paid: undefined, insurance: undefined, mileage: undefined, cancelled: undefined })),
     inspections: state.inspections.filter((inspection) => {
       const booking = state.bookings.find((b) => b.id === inspection.bookingId);
       return booking !== undefined && (booking.userId === me || mine(booking.carId));

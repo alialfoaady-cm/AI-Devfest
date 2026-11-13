@@ -40,8 +40,22 @@ export type Booking = {
   from: string;
   to: string;
   days: number;
-  status: "booked" | "returned";
+  status: "booked" | "returned" | "cancelled";
+  /** Set on return, when both odometer readings could be read. */
+  mileage?: MileageCharge;
+  /** How the trip was paid for. */
+  paid?: Payment;
+  /** Set when the borrower bought cover: Sayara pays for damage the owner confirms. */
+  insurance?: Payment;
+  /** Set when the trip was cancelled before pickup. */
+  cancelled?: { by: string; fee: Payment; parkingCredits: number; refund: Payment };
 };
+
+/** A price paid part in credits and part in dollars (either part can be zero). */
+export type Payment = { credits: number; usd: number };
+
+/** Miles driven against the miles a trip includes, and what the extra ones cost in credits. */
+export type MileageCharge = { miles: number; included: number; extraMiles: number; credits: number };
 
 /** One finding from the model. It is a flag for a person to review, never a verdict. */
 export type Damage = {

@@ -6,8 +6,8 @@ import { applyAction, viewFor } from "./actions";
 const state: State = {
   users: [
     { id: "owner", name: "Owner", credits: 0 },
-    { id: "guest", name: "Guest", credits: 7 },
-    { id: "other", name: "Other", credits: 7 },
+    { id: "guest", name: "Guest", credits: 245 },
+    { id: "other", name: "Other", credits: 245 },
   ],
   cars: [
     {
@@ -31,8 +31,31 @@ const trip = { carId: "car-1", from: "2027-01-10", to: "2027-01-13" };
 test("a booking is made by whoever is signed in, whatever the browser sends", async () => {
   const next = await applyAction(state, "guest", "book", { ...trip, userId: "other" });
   expect(next.bookings[0].userId).toBe("guest");
-  expect(next.users.find((u) => u.id === "guest")?.credits).toBe(4);
-  expect(next.users.find((u) => u.id === "other")?.credits).toBe(7);
+  expect(next.users.find((u) => u.id === "guest")?.credits).toBe(245 - 105);
+  expect(next.users.find((u) => u.id === "other")?.credits).toBe(245);
+});
+
+test("a visitor without an account can browse, and learns nothing private", async () => {
+  const booked = await applyAction(state, "guest", "book", trip);
+  const seen = viewFor({ ...booked, users: [{ id: "owner", name: "Olive Owner", credits: 3 }, ...booked.users.slice(1)] }, "");
+  expect(seen.cars).toHaveLength(1);
+  expect(seen.cars[0].pin).toBeUndefined();
+  expect(seen.cars[0].spot).toBeUndefined();
+  expect(seen.users).toEqual([{ id: "owner", name: "Olive", credits: 0 }]); // owners only, first names
+  expect(seen.bookings[0]).toMatchObject({ carId: "car-1", userId: "" }); // the days are taken; by whom is not said
+  expect(seen.inspections).toHaveLength(0);
+  expect(() => applyAction(state, "", "book", trip)).toThrow();
+});
+
+test("what a trip cost and whether it is insured are only for its two people", async () => {
+  const booked = await applyAction(state, "guest", "book", { ...trip, creditsUsed: 0 });
+  const insured = await applyAction(booked, "guest", "insure", { bookingId: booked.bookings[0].id, creditsUsed: 30 });
+  expect(viewFor(insured, "guest").bookings[0].insurance).toEqual({ credits: 30, usd: 0 });
+  expect(viewFor(insured, "owner").bookings[0].paid).toEqual({ credits: 0, usd: 157.5 });
+  expect(viewFor(insured, "other").bookings[0].paid).toBeUndefined();
+  expect(viewFor(insured, "other").bookings[0].insurance).toBeUndefined();
+  expect(viewFor(insured, "").bookings[0]).not.toHaveProperty("paid");
+  expect(() => applyAction(insured, "other", "insure", { bookingId: booked.bookings[0].id })).toThrow(/not yours/);
 });
 
 test("dates must be real dates", () => {

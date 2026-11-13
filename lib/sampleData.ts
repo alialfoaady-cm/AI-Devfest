@@ -3,8 +3,8 @@ import { SLOTS, type Photos, type State } from "./types";
 
 export const SAMPLE_STATE: State = {
   users: [
-    { id: "user-a", name: "Avery (demo A)", credits: 2 },
-    { id: "user-b", name: "Blake (demo B)", credits: 10 },
+    { id: "user-a", name: "Avery (demo A)", credits: 70 },
+    { id: "user-b", name: "Blake (demo B)", credits: 350 },
   ],
   cars: [
     {
