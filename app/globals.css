@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/* Palette comes from the place the app lives: a parking structure at an airport.
+   Concrete floor, lane paint, wayfinding blue, and three signal colours for the photo check. */
+@theme {
+  --color-concrete: #e8eaed;
+  --color-surface: #ffffff;
+  --color-ink: #16233a;
+  --color-ink-soft: #4a5568;
+  --color-line: #c9ced6;
+  --color-lane: #ffc914;
+  --color-lane-deep: #e0ac00;
+  --color-lake: #0b5fd8;
+  --color-flag: #b3261e;
+  --color-flag-tint: #fbe5e3;
+  --color-unsure: #7a4f00;
+  --color-unsure-tint: #fff1cc;
+  --color-clear: #17693f;
+  --color-clear-tint: #ddf3e6;
+  --font-sans: var(--font-barlow), system-ui, sans-serif;
+  --font-display: var(--font-barlow-condensed), var(--font-barlow), system-ui, sans-serif;
+}
+
+body {
+  background: var(--color-concrete);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-lake);
+  outline-offset: 2px;
+}
+
+button:not(:disabled),
+label[for],
+select,
+summary {
+  cursor: pointer;
+}
+
+/* Bay striping, used once: behind the locker code. */
+.bay-stripes {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--color-lane) 0 14px,
+    var(--color-ink) 14px 28px
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
