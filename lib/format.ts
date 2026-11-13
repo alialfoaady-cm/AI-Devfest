@@ -15,6 +15,13 @@ export function isoDay(offset = 0): string {
   return `${day.getFullYear()}-${two(day.getMonth() + 1)}-${two(day.getDate())}`;
 }
 
+/** When a message was sent: "4:32 PM" today, "Nov 13, 4:32 PM" on any other day, in the reader's own time zone. */
+export function messageTime(at: string): string {
+  const sent = new Date(at);
+  const time = sent.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  return sent.toDateString() === new Date().toDateString() ? time : `${sent.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${time}`;
+}
+
 export const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
 
 /** 367.5 -> "$367.50" */

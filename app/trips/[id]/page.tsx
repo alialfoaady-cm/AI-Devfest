@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowSquareOut, MapPin } from "@phosphor-icons/react";
+import { ArrowSquareOut, ChatCircle, MapPin } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ParkingMap, mapsLink } from "@/components/ParkingMap";
@@ -83,6 +83,12 @@ export default function TripPage() {
             ))}
           </ol>
         </div>
+        {(isBorrower || isOwner) && (
+          <Link href={`/chat/${booking.id}`} className={`${btnQuiet} sm:self-start`}>
+            <ChatCircle size={20} weight="fill" aria-hidden />
+            Message {isOwner ? borrower : owner}
+          </Link>
+        )}
       </header>
 
       {/* On phones the blocks stack in the order you need them; from lg the map sits beside the steps. */}
