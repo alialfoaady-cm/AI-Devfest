@@ -6,7 +6,7 @@
 import { Camera, Image as ImageIcon, X } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import { fileToPhoto, shrinkToPhoto } from "@/lib/inspection/images";
-import { CarPhoto, Notice, btnQuiet } from "./ui";
+import { CarPhoto, Notice, btnQuiet, carPhoto } from "./ui";
 
 const CORNERS = [
   "left-3 top-3 rounded-tl-lg border-l-2 border-t-2",
@@ -63,7 +63,7 @@ export function CarPhotoPicker({ photo, model, onChange }: { photo?: string; mod
 
   return (
     <div>
-      <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-surface">
+      <div className={`${carPhoto} relative overflow-hidden bg-surface`}>
         {stream ? (
           <>
             <video ref={video} autoPlay playsInline muted aria-label="Camera preview" className="size-full bg-black object-cover" />

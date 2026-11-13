@@ -1,6 +1,7 @@
 "use client";
 
-// The app's dropdown. It replaces the browser's own <select> so the list can carry a tag per
+// The app's dropdown. Its two looks match `field` and `Segment` in ui.tsx: change them together.
+// It replaces the browser's own <select> so the list can carry a tag per
 // option (an airport's three-letter code, set like a bag tag) and look the same on every device.
 // Keyboard and screen-reader behaviour follow the standard select-only combobox pattern:
 // arrows, Home, End, Enter, Space, Escape, and typing a letter to jump.
@@ -14,14 +15,14 @@ const LOOK = {
   /** A form field with its label above. */
   field: {
     label: "block font-medium",
-    button: "mt-1.5 flex h-12 w-full items-center gap-2 rounded-lg bg-surface px-3.5 text-left",
+    button: "mt-1.5 flex h-14 w-full items-center gap-2 rounded-lg bg-surface px-4 text-left",
     value: "flex min-w-0 flex-1 items-center gap-2",
   },
   /** One part of a `searchBar`: the whole segment is the button. */
   segment: {
-    label: "block text-sm font-semibold",
-    button: "block w-full rounded-[inherit] px-4 py-2.5 text-left transition-colors duration-150 hover:bg-surface aria-expanded:bg-surface",
-    value: "flex h-7 items-center gap-2",
+    label: "block text-xs font-medium leading-4 text-ink-soft",
+    button: "block w-full rounded-[inherit] px-4 py-2 text-left transition-colors duration-150 hover:bg-surface aria-expanded:bg-surface",
+    value: "flex h-6 items-center gap-2",
   },
 };
 
@@ -142,7 +143,7 @@ export function Select({
         <span className={look.value}>
           <span id={`${id}-value`} className="flex min-w-0 items-baseline gap-2">
             {current.tag && <span className="text-sm font-bold tracking-wider">{current.tag}</span>}
-            <span className="truncate text-ink-soft">{current.label}</span>
+            <span className="truncate">{current.label}</span>
           </span>
           <CaretDown
             size={16}
