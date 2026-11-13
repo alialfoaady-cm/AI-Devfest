@@ -125,14 +125,53 @@ returnCar(state, bookingId)                      // marks it returned, pays the 
 
 | Part | Choice | Status |
 |---|---|---|
-| App | Plain HTML, CSS and JavaScript web app | Decided |
-| Phone photos | `<input type="file" accept="image/*" capture>` | Decided |
-| AI | IBM technology (watsonx, Granite models) | Decided, because judging scores IBM use. The exact model is not chosen |
-| Server | A small server to hold the IBM key | Probably needed, not confirmed |
-| Database | localStorage now; a shared database if two devices are used in the demo | Open |
-| Map | A static map image | Open (which provider) |
+| App | Next.js (App Router), TypeScript, Tailwind CSS. One repo, no separate backend | Built |
+| State | The browser's localStorage, behind one module (`lib/store.ts`). No database | Built |
+| Booking rules | Pure functions in `lib/rules.ts`, one Vitest test per rule in section 6 | Built |
+| Phone photos | `<input type="file" accept="image/*" capture>`, resized in the browser to 1120 px on the long edge | Built |
+| AI, mock mode | `lib/inspection/mock.ts` returns canned answers so the demo runs with no credentials. This is the default | Built |
+| AI, real | IBM watsonx.ai, called only from the server in `lib/inspection/watsonx.ts` | **Not built yet.** The model is not chosen |
+| Server | One route, `app/api/inspect/route.ts`. It is the only place the IBM key may be read | Built (mock only) |
+| Map | A static map image | Not built |
 
-An earlier plan used Google Gemini, Firebase and Google Maps. That plan is replaced wherever the judging criteria call for IBM.
+An earlier plan used a plain HTML and JavaScript app, and before that Google Gemini, Firebase and Google Maps. Both are replaced.
+
+### Run it
+
+```bash
+npm install
+npm run dev      # http://localhost:3000, mock AI, no credentials needed
+npm test         # booking rules and inspection checks
+```
+
+- **Mock or watsonx:** copy `.env.example` to `.env.local` and set `INSPECTION_PROVIDER=mock` or `watsonx`. `.env.local` is git-ignored. Never prefix these variables with `NEXT_PUBLIC_`, or the key reaches the browser.
+- **Demo on a phone, or in front of judges:** use the production build, `npm run build` then `npm start -- -H 0.0.0.0`, and open `http://<laptop-ip>:3000` on the phone. The dev server refuses to load the app for any host other than `localhost`.
+- **Reset:** the "Reset sample data" link at the bottom of every screen restores the two demo users and two cars.
+- **Sample photos:** drawn placeholders in `public/samples`, made by `node scripts/make-samples.mjs`. To use toy-car photos, replace those 12 files and keep the names (or change the paths in `lib/sampleData.ts`).
+
+### How the photo check is wired
+
+1. `components/trip/ReturnStep.tsx` calls `compareInspection(before, after, slot)` from `lib/inspection/client.ts` once per photo slot.
+2. That function stitches the pair into one image (`lib/inspection/stitch.ts`: pickup on the left, return on the right, at most 1120 px) and posts it to `/api/inspect`. Stitching needs a canvas, so it happens in the browser. To change how the pair is packed, change `stitch.ts` and the prompt.
+3. The route picks an adapter from `INSPECTION_PROVIDER`. Every adapter has the shape in `lib/inspection/adapter.ts`: one stitched image and a slot in, the model's raw answer out.
+4. `lib/inspection/validate.ts` checks the answer against the JSON shape in section 7. A failed check gives `null`.
+5. `lib/inspection/verdict.ts` decides what the screen says: `null` or a finding under 60% confidence is "unsure", never "damage". The 60% line is `MIN_DAMAGE_CONFIDENCE` in `lib/config.ts`.
+
+Two additions to the data model in section 8: the AI result carries `odometer_before_km` next to `odometer_km` (kilometres driven needs both readings, and the stitched image shows both dashboards), and a return inspection stores one AI result per photo slot plus `aiProvider`.
+
+### Who owns what
+
+Five people can work at once if each stays in their own folder. Ask before editing someone else's.
+
+| Person | Owns | Job |
+|---|---|---|
+| AI inspection | `lib/inspection/` | Write `watsonx.ts` and the prompt, test on the toy car, tune `validate.ts`, `verdict.ts` and `stitch.ts` |
+| API route | `app/api/inspect/`, `.env.example` | Wire the watsonx adapter in, read the IBM credentials, handle timeouts and errors |
+| Compare UI | `components/compare/` | The return report: side-by-side photos, flags, confidence, confirm or dispute |
+| Booking and data | `lib/rules.ts`, `lib/store.ts`, `lib/inspections.ts`, `lib/sampleData.ts`, `components/booking/`, `components/trip/`, `app/page.tsx`, `app/trip/` | Search, booking, photo capture, sample data. Section 6 rules stay as written |
+| Pitch assets | `public/samples/`, `lib/config.ts`, `docs/` | Toy-car photos, the impact estimate and its wording, slides, the backup video |
+
+Shared by everyone, so change with care: `lib/types.ts`, `components/ui.ts`, `app/globals.css`, `components/shell/`.
 
 ## 10. The demo (3 minutes)
 
