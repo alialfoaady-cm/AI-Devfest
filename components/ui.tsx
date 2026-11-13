@@ -52,15 +52,21 @@ export function Notice({ tone = "red", children }: { tone?: "red" | "amber"; chi
 }
 
 /** The car's picture, or a plain tile when its owner has not added one. */
-export function CarPhoto({ photo, model, className = "" }: { photo?: string; model: string; className?: string }) {
-  // The demo listings' photos (public/cars) are cutouts with no background: set each one on the same
-  // showroom floor, whole and centred, so cars from different photos line up card to card.
+/** Garage interiors the demo cars are parked in. Sources in public/cars/CREDITS.md. */
+const GARAGES = ["/cars/garage-1.jpg", "/cars/garage-2.jpg", "/cars/garage-3.jpg"];
+
+export function CarPhoto({ photo, model, id = "", className = "" }: { photo?: string; model: string; id?: string; className?: string }) {
+  // The demo listings' photos (public/cars) are cutouts with no background. Each is parked, whole and
+  // centred, in a real garage (softened backdrop photos, also in public/cars), grounded by two shadows.
   if (photo?.startsWith("/cars/")) {
+    // A demo car's id ends in its place in its airport's row, so cycling by it mixes the garages in every row.
+    const garage = GARAGES[Number(/\d+$/.exec(id)?.[0] ?? 0) % GARAGES.length];
     return (
       <span className={`relative block overflow-hidden bg-surface ${className}`}>
-        <span aria-hidden className="absolute inset-0 bg-[radial-gradient(ellipse_75%_65%_at_50%_30%,var(--surface-2),transparent)]" />
-        <span aria-hidden className="absolute inset-x-0 bottom-0 h-[32%] bg-gradient-to-b from-transparent to-surface-2" />
-        <span aria-hidden className="absolute bottom-[16%] left-1/2 h-[9%] w-[74%] -translate-x-1/2 rounded-[50%] bg-black/45 blur-[10px]" />
+        <img src={garage} alt="" aria-hidden loading="lazy" className="absolute inset-0 size-full object-cover object-[50%_60%]" />
+        <span aria-hidden className="absolute inset-0 bg-[radial-gradient(ellipse_90%_80%_at_50%_45%,transparent_45%,rgb(0_0_0/0.4))]" />
+        <span aria-hidden className="absolute bottom-[14%] left-1/2 h-[11%] w-[82%] -translate-x-1/2 rounded-[50%] bg-black/50 blur-[12px]" />
+        <span aria-hidden className="absolute bottom-[18%] left-1/2 h-[4%] w-[68%] -translate-x-1/2 rounded-[50%] bg-black/70 blur-[5px]" />
         <img src={photo} alt={model} className="absolute bottom-[19%] left-1/2 h-[62%] w-[84%] -translate-x-1/2 object-contain object-bottom" />
       </span>
     );

@@ -54,7 +54,7 @@ export default function TripPage() {
   return (
     <div className="space-y-8">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
-        <CarPhoto photo={car.photo} model={car.model} className="aspect-[4/3] w-32 shrink-0 rounded-xl sm:w-36" />
+        <CarPhoto photo={car.photo} model={car.model} id={car.id} className="aspect-[4/3] w-32 shrink-0 rounded-xl sm:w-36" />
         <div className="min-w-0 flex-1">
           <h1 className={pageTitle}>
             {car.model} at {car.airport}

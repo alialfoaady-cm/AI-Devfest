@@ -46,7 +46,7 @@ export default function TripsPage() {
             const stage = STAGE[tripStage(state, trip.id)];
             return (
               <li key={trip.id} className={carCard}>
-                <CarPhoto photo={car?.photo} model={car?.model ?? "Car"} className="aspect-[3/2] w-full" />
+                <CarPhoto photo={car?.photo} model={car?.model ?? "Car"} id={car?.id} className="aspect-[3/2] w-full" />
                 <div className="flex flex-1 flex-col items-start p-4">
                   <Pill tone={stage.tone}>{stage.pill}</Pill>
                   <h2 className={`${cardTitle} mt-2`}>

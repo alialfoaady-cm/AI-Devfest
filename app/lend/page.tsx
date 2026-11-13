@@ -53,7 +53,7 @@ export default function LendPage() {
           return (
             <li key={car.id} className={`${card} overflow-hidden`}>
               <div className="grid grid-cols-2">
-                <CarPhoto photo={car.photo} model={car.model} className="aspect-[4/3] w-full" />
+                <CarPhoto photo={car.photo} model={car.model} id={car.id} className="aspect-[4/3] w-full" />
                 {car.pin ? (
                   <ParkingMap center={car.pin} label={car.spot} className="rounded-none border-0" />
                 ) : (

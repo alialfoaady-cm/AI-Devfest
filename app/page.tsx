@@ -139,6 +139,7 @@ export default function FindPage() {
                       <CarPhoto
                         photo={car.photo}
                         model={car.model}
+                        id={car.id}
                         className="aspect-[20/19] w-full transition-transform duration-500 ease-out group-hover:scale-[1.04]"
                       />
                       <span className="absolute left-3 top-3 rounded-full bg-canvas/90 px-2.5 py-1 text-xs font-semibold">Back by {shortDate(car.to)}</span>
@@ -198,7 +199,7 @@ export default function FindPage() {
       >
         {picked && (
           <>
-            <CarPhoto photo={picked.photo} model={picked.model} className="aspect-[3/2] w-full" />
+            <CarPhoto photo={picked.photo} model={picked.model} id={picked.id} className="aspect-[3/2] w-full" />
             <div className="space-y-4 p-5">
               <div>
                 <h2 id="book-title" className={heading}>
