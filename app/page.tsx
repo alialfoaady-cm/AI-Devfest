@@ -233,11 +233,12 @@ export default function FindPage() {
               </p>
               {me && <PayChoice cost={cost} balance={credits} useCredits={useCredits} onChange={setUseCredits} />}
               <Notice>{error}</Notice>
-              <div className="grid grid-cols-2 gap-2">
+              {/* Book gets the room it needs; a long price wraps onto a second line inside the button. */}
+              <div className="grid grid-cols-[auto_1fr] gap-2">
                 <button type="button" className={btnQuiet} onClick={() => booking.current?.close()}>
                   Cancel
                 </button>
-                <button type="button" className={btnPrimary} disabled={busy} onClick={book}>
+                <button type="button" className={`${btnPrimary} h-auto! min-h-12 py-2 leading-tight text-balance`} disabled={busy} onClick={book}>
                   {me ? `Book for ${payText({ credits: creditsUsed, usd: (cost - creditsUsed) * USD_PER_CREDIT })}` : "Log in to book"}
                 </button>
               </div>
