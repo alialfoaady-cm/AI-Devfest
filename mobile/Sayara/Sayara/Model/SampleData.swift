@@ -10,10 +10,10 @@ enum SampleData {
         cars: [
             Car(id: "car-a", ownerId: "user-a", airport: "DTW", model: "Blue hatchback", seats: 5,
                 from: "2026-12-18", to: "2026-12-30",
-                pin: ParkingPin(latitude: 42.2097, longitude: -83.3478, note: "Lot P3, row C")),
+                pin: Pin(lat: 42.2068, lng: -83.3555), spot: "B-214"),
             Car(id: "car-b", ownerId: "user-b", airport: "YYZ", model: "Green wagon", seats: 5,
                 from: "2026-12-20", to: "2026-12-27",
-                pin: ParkingPin(latitude: 43.6812, longitude: -79.6170, note: "Lot 1, level 2")),
+                pin: Pin(lat: 43.6831, lng: -79.6135), spot: "C-108"),
         ],
         bookings: [],
         inspections: []

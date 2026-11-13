@@ -4,6 +4,7 @@ import SwiftUI
 struct FindCarView: View {
     @Environment(AppStore.self) private var store
     var onBooked: (String) -> Void
+    var onLend: () -> Void
 
     @State private var airport = SampleData.defaultAirport
     @State private var from = SampleData.defaultFrom
@@ -12,45 +13,39 @@ struct FindCarView: View {
     @State private var pending: Car?
 
     private var days: Int { Rules.tripDays(from, to) }
+    private var credits: Int { store.currentUser?.credits ?? 0 }
     private var results: [Car] {
         Rules.availableCars(store.state, airport: airport, from: from, to: to, userId: store.currentUserId)
     }
 
     var body: some View {
         Screen {
-            Text("Land, unlock, drive. Pay with credits you earned lending your own car.")
-                .font(.subheadline).foregroundStyle(Theme.textSoft)
+            Text("Find a car where you land")
+                .font(.largeTitle.bold()).foregroundStyle(Theme.text)
 
             Card {
-                Text("Where are you landing?").font(.headline).foregroundStyle(Theme.text)
+                Text("Where").font(.caption.weight(.semibold)).foregroundStyle(Theme.textSoft)
                 AirportPicker(code: $airport)
                 DayRangePicker(fromLabel: "Pick up", toLabel: "Return", from: $from, to: $to)
-                HStack {
-                    Text(days >= 1 ? "\(plural(days, "day")) · \(plural(days, "credit"))" : "A trip must be at least 1 day.")
-                        .foregroundStyle(days >= 1 ? Theme.green : Theme.flag)
-                    Spacer()
-                    Text("You have \(store.currentUser?.credits ?? 0)").foregroundStyle(Theme.textSoft)
-                }
-                .font(.subheadline.weight(.semibold))
             }
 
+            summary
+
             if let error { ErrorBanner(message: error) }
+            if days >= 1 && credits < days && !results.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    AmberNote(message: "This trip needs \(plural(days, "credit")) and you have \(credits). Lend your car to earn more, or shorten the trip.")
+                    Button("Lend my car", action: onLend).buttonStyle(.secondary)
+                }
+            }
 
-            SectionTitle(text: results.isEmpty ? "No cars free" : "\(plural(results.count, "car")) free",
-                         detail: results.isEmpty
-                            ? "No car at \(airport) is free for the whole trip. Try other dates."
-                            : "Each one is back before its owner lands.")
+            ForEach(results) { car in carCard(car) }
 
-            ForEach(results) { car in
-                Card {
-                    CarSummary(car: car, owner: store.state.user(car.ownerId))
-                    Button("Book for \(plural(days, "credit"))") { pending = car }
-                        .buttonStyle(.primary)
-                        .disabled((store.currentUser?.credits ?? 0) < days)
-                    if (store.currentUser?.credits ?? 0) < days {
-                        Text("You need \(days - (store.currentUser?.credits ?? 0)) more credits. Lend your car to earn them.")
-                            .font(.caption).foregroundStyle(Theme.unsure)
-                    }
+            if days >= 1 && results.isEmpty {
+                EmptyState(symbol: "car.side",
+                           title: "No cars at \(airport) for those dates yet",
+                           message: "Try other dates or the other airport. If you park here when you fly, your car could be the first.") {
+                    Button("List my car", action: onLend).buttonStyle(.primary)
                 }
             }
         }
@@ -64,6 +59,43 @@ struct FindCarView: View {
         } message: {
             Text("\(Day.short(from)) to \(Day.short(to)). \(plural(days, "credit")) come off your balance now. The owner gets them when you return the car.")
         }
+    }
+
+    @ViewBuilder private var summary: some View {
+        if days >= 1 {
+            let place = Airport.named(airport)?.name ?? airport
+            (Text(plural(results.count, "car")).bold().foregroundStyle(Theme.text)
+             + Text(" at \(place) for \(plural(days, "day")). Each costs \(plural(days, "credit")); you have \(credits)."))
+                .font(.subheadline)
+                .foregroundStyle(Theme.textSoft)
+        } else {
+            Text("Pick a return date at least one day after pickup.")
+                .font(.subheadline).foregroundStyle(Theme.flag)
+        }
+    }
+
+    /// Turo-style card: big 3:2 photo, heavy name, one line of facts, price and Book.
+    private func carCard(_ car: Car) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            CarPhotoView(car: car)
+                .aspectRatio(3 / 2, contentMode: .fit)
+                .frame(maxWidth: .infinity)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.radius))
+            Text(car.model).font(.title3.weight(.heavy)).foregroundStyle(Theme.text)
+            Text("\(plural(car.seats, "seat")). Lent by \(store.state.firstName(car.ownerId)), back by \(Day.short(car.to)).")
+                .font(.subheadline).foregroundStyle(Theme.textSoft)
+            HStack {
+                (Text(plural(days, "credit")).bold().foregroundStyle(Theme.text)
+                 + Text(" for \(plural(days, "day"))").foregroundStyle(Theme.textSoft))
+                    .monospacedDigit()
+                Spacer()
+                Button("Book") { pending = car }
+                    .buttonStyle(.primary)
+                    .frame(width: 110)
+                    .disabled(credits < days)
+            }
+        }
+        .padding(.bottom, 10)
     }
 
     private func book(_ car: Car) {

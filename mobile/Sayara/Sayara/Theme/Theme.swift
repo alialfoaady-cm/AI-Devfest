@@ -2,17 +2,26 @@ import SwiftUI
 
 /// Black background, green accents. Change colours here and nowhere else.
 enum Theme {
-    static let background = Color.black
-    static let surface = Color(white: 0.08)
-    static let surfaceRaised = Color(white: 0.13)
-    static let line = Color(white: 0.2)
-    static let text = Color.white
-    static let textSoft = Color(white: 0.62)
-    static let green = Color(red: 0.18, green: 0.88, blue: 0.40)
-    static let greenTint = green.opacity(0.14)
-    static let flag = Color(red: 1.0, green: 0.42, blue: 0.36)
-    static let unsure = Color(red: 1.0, green: 0.78, blue: 0.28)
-    static let radius: CGFloat = 16
+    // The web app's dark colours (app/globals.css on the team's ui-redesign branch).
+    static let background = Color(hex: 0x000000)   // --canvas
+    static let surface = Color(hex: 0x161616)      // --surface
+    static let surfaceRaised = Color(hex: 0x242424) // --surface-2
+    static let line = Color(hex: 0x2C2C2C)         // --line
+    static let text = Color.white                  // --ink
+    static let textSoft = Color(hex: 0xA8A8A8)     // --ink-soft
+    static let green = Color(hex: 0x1FDC6C)        // --green: actions and the map pin
+    static let greenText = Color(hex: 0x3FE585)    // --green-ink: green as text
+    static let greenTint = Color(hex: 0x0C2A18)    // --green-soft
+    static let onGreen = Color(hex: 0x04180C)      // text on green
+    static let flag = Color(hex: 0xFF7B6E)         // --red
+    static let unsure = Color(hex: 0xF5B84D)       // --amber
+    static let radius: CGFloat = 12                // cards and maps
+}
+
+extension Color {
+    init(hex: UInt32) {
+        self.init(red: Double((hex >> 16) & 0xFF) / 255, green: Double((hex >> 8) & 0xFF) / 255, blue: Double(hex & 0xFF) / 255)
+    }
 }
 
 /// Solid green, black text. The main action on a screen.
@@ -22,9 +31,9 @@ struct PrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
-            .foregroundStyle(.black)
+            .foregroundStyle(Theme.onGreen)
             .frame(maxWidth: .infinity, minHeight: 52)
-            .background(Theme.green.opacity(isEnabled ? 1 : 0.3), in: RoundedRectangle(cornerRadius: 14))
+            .background(Theme.green.opacity(isEnabled ? 1 : 0.3), in: RoundedRectangle(cornerRadius: 8))
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
             .opacity(configuration.isPressed ? 0.85 : 1)
     }
@@ -37,10 +46,10 @@ struct SecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
-            .foregroundStyle(Theme.green.opacity(isEnabled ? 1 : 0.4))
+            .foregroundStyle(Theme.text.opacity(isEnabled ? 1 : 0.4))
             .frame(maxWidth: .infinity, minHeight: 48)
-            .background(Theme.greenTint.opacity(configuration.isPressed ? 2 : 1), in: RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.green.opacity(isEnabled ? 0.7 : 0.25), lineWidth: 1))
+            .background(configuration.isPressed ? Theme.surfaceRaised : Theme.surface, in: RoundedRectangle(cornerRadius: 8))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.line, lineWidth: 1))
     }
 }
 

@@ -1,78 +1,69 @@
 import SwiftUI
 
-/// Trips you booked, and who borrowed your car and what you earned.
+/// Cars you borrowed, from pickup to return. (Cars you lent are on the Lend tab.)
 struct TripsView: View {
     @Environment(AppStore.self) private var store
+    var onFind: () -> Void
 
-    private var myTrips: [Booking] {
+    private var trips: [Booking] {
         store.state.bookings.filter { $0.userId == store.currentUserId }.reversed()
-    }
-
-    private var lentOut: [Booking] {
-        let mine = Set(store.state.cars.filter { $0.ownerId == store.currentUserId }.map(\.id))
-        return store.state.bookings.filter { mine.contains($0.carId) }.reversed()
     }
 
     var body: some View {
         Screen {
-            SectionTitle(text: "Cars you booked")
-            if myTrips.isEmpty {
-                Card { Text("No trips yet. Find a car where you land.").foregroundStyle(Theme.textSoft) }
+            if trips.isEmpty {
+                EmptyState(symbol: "point.topleft.down.to.point.bottomright.curvepath", title: "No trips yet",
+                           message: "Cars you borrow show up here, from pickup to return. Each day costs one credit.") {
+                    Button("Find a car", action: onFind).buttonStyle(.primary)
+                }
             }
-            ForEach(myTrips) { booking in
-                NavigationLink(value: booking.id) { TripRow(booking: booking, perspective: .borrower) }
-                    .buttonStyle(.plain)
-            }
-
-            SectionTitle(text: "Your car, lent out",
-                         detail: "You earn the credits when the car comes back.")
-            if lentOut.isEmpty {
-                Card { Text("Nobody has borrowed your car yet.").foregroundStyle(Theme.textSoft) }
-            }
-            ForEach(lentOut) { booking in
-                NavigationLink(value: booking.id) { TripRow(booking: booking, perspective: .owner) }
-                    .buttonStyle(.plain)
-            }
+            ForEach(trips) { trip in TripCard(booking: trip) }
         }
     }
 }
 
-private struct TripRow: View {
-    enum Perspective { case borrower, owner }
-
+private struct TripCard: View {
     @Environment(AppStore.self) private var store
     let booking: Booking
-    let perspective: Perspective
 
     var body: some View {
         let car = store.state.car(booking.carId)
-        let returned = booking.status == .returned
-        Card {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(car?.model ?? "Car").font(.headline).foregroundStyle(Theme.text)
-                    Text("\(car?.airport ?? "") · \(Day.short(booking.from)) – \(Day.short(booking.to)) · \(plural(booking.days, "day"))")
-                        .font(.subheadline).foregroundStyle(Theme.textSoft)
-                    if perspective == .owner {
-                        Text("Borrowed by \(store.state.user(booking.userId)?.name ?? "someone")")
-                            .font(.caption).foregroundStyle(Theme.textSoft)
-                    }
-                }
-                Spacer()
-                VStack(alignment: .trailing, spacing: 6) {
-                    if perspective == .owner {
-                        Pill(text: returned ? "+\(booking.days) earned" : "+\(booking.days) on return",
-                             color: returned ? Theme.green : Theme.textSoft)
-                    } else {
-                        Pill(text: returned ? "Returned" : nextStep, color: returned ? Theme.textSoft : Theme.green)
-                    }
-                    Image(systemName: "chevron.right").foregroundStyle(Theme.textSoft)
-                }
-            }
+        let stage = store.state.stage(booking.id)
+        VStack(alignment: .leading, spacing: 8) {
+            CarPhotoView(car: car)
+                .aspectRatio(3 / 2, contentMode: .fit)
+                .frame(maxWidth: .infinity)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.radius))
+            pill(stage)
+            Text("\(car?.model ?? "Car") at \(car?.airport ?? "")").font(.title3.weight(.heavy)).foregroundStyle(Theme.text)
+            Text("\(Day.short(booking.from)) to \(Day.short(booking.to)), \(plural(booking.days, "credit"))")
+                .font(.subheadline).foregroundStyle(Theme.textSoft)
+            NavigationLink(value: booking.id) { Text(action(stage)) }
+                .modifier(StageButton(stage: stage))
+        }
+        .padding(.bottom, 10)
+    }
+
+    private func pill(_ stage: TripStage) -> some View {
+        switch stage {
+        case .pickup: Pill(text: "Ready to pick up", color: Theme.greenText)
+        case .driving: Pill(text: "On the road", color: Theme.text)
+        case .returned: Pill(text: "Returned", color: Theme.textSoft)
         }
     }
 
-    private var nextStep: String {
-        store.state.inspection(booking.id, .pickup) == nil ? "Pickup photos" : "Driving"
+    private func action(_ stage: TripStage) -> String {
+        switch stage {
+        case .pickup: "Find the car"
+        case .driving: "Return the car"
+        case .returned: "See return report"
+        }
+    }
+}
+
+private struct StageButton: ViewModifier {
+    let stage: TripStage
+    func body(content: Content) -> some View {
+        if stage == .returned { content.buttonStyle(.secondary) } else { content.buttonStyle(.primary) }
     }
 }

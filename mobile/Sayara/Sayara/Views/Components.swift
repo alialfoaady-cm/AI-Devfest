@@ -12,7 +12,7 @@ struct DayRangePicker: View {
         VStack(spacing: 10) {
             DatePicker(fromLabel, selection: day($from), displayedComponents: .date)
             Divider().overlay(Theme.line)
-            DatePicker(toLabel, selection: day($to), displayedComponents: .date)
+            DatePicker(toLabel, selection: day($to), in: Day.date(from)..., displayedComponents: .date)
         }
         .foregroundStyle(Theme.text)
     }
@@ -27,32 +27,88 @@ struct AirportPicker: View {
 
     var body: some View {
         Picker("Airport", selection: $code) {
-            ForEach(Airport.all) { Text("\($0.code) · \($0.name)").tag($0.code) }
+            ForEach(Airport.all) { Text("\($0.name) (\($0.code))").tag($0.code) }
         }
         .pickerStyle(.segmented)
     }
 }
 
-/// Model, seats, airport and the owner's window. Used in search results and trip pages.
+/// The listing photo, or a quiet placeholder with the car's name when there is none.
+struct CarPhotoView: View {
+    let car: Car?
+    var model: String? = nil
+    var preview: UIImage? = nil
+
+    var body: some View {
+        ZStack {
+            if let preview {
+                Image(uiImage: preview).resizable().scaledToFill()
+            } else if let name = car?.photo, let image = PhotoStore.load(name) {
+                Image(uiImage: image).resizable().scaledToFill()
+            } else {
+                Theme.surfaceRaised
+                VStack(spacing: 6) {
+                    Image(systemName: "car.side.fill").font(.system(size: 34, weight: .light))
+                    Text(model ?? car?.model ?? "Car").font(.footnote.weight(.medium)).lineLimit(1)
+                }
+                .foregroundStyle(Theme.textSoft)
+                .padding(.horizontal, 8)
+            }
+        }
+        .clipped()
+    }
+}
+
+/// A trip's car: small photo, name and dates. Used at the top of a trip.
 struct CarSummary: View {
     let car: Car
     var owner: User? = nil
 
     var body: some View {
         HStack(alignment: .top, spacing: 14) {
-            Image(systemName: "car.side.fill")
-                .font(.title2)
-                .foregroundStyle(Theme.green)
-                .frame(width: 52, height: 52)
-                .background(Theme.greenTint, in: RoundedRectangle(cornerRadius: 12))
+            CarPhotoView(car: car)
+                .frame(width: 96, height: 72)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
             VStack(alignment: .leading, spacing: 4) {
-                Text(car.model).font(.headline).foregroundStyle(Theme.text)
-                Text("\(car.seats) seats · \(car.airport)\(owner.map { " · lent by \($0.name)" } ?? "")")
+                Text("\(car.model) at \(car.airport)").font(.headline).foregroundStyle(Theme.text)
+                Text("\(plural(car.seats, "seat"))\(owner.map { ". Lent by \($0.name.components(separatedBy: " ").first ?? $0.name)" } ?? ""), back by \(Day.short(car.to)).")
                     .font(.subheadline).foregroundStyle(Theme.textSoft)
-                Text("Free \(Day.short(car.from)) – \(Day.short(car.to)) (owner lands \(Day.short(car.to)))")
-                    .font(.caption).foregroundStyle(Theme.textSoft)
             }
         }
+    }
+}
+
+/// An empty list: an icon, what is missing, and the one thing to do about it.
+struct EmptyState<Action: View>: View {
+    let symbol: String
+    let title: String
+    let message: String
+    @ViewBuilder var action: Action
+
+    var body: some View {
+        VStack(spacing: 10) {
+            Image(systemName: symbol).font(.system(size: 36, weight: .light)).foregroundStyle(Theme.textSoft)
+            Text(title).font(.headline).multilineTextAlignment(.center).foregroundStyle(Theme.text)
+            Text(message).font(.subheadline).multilineTextAlignment(.center).foregroundStyle(Theme.textSoft)
+            action.padding(.top, 6)
+        }
+        .padding(24)
+        .frame(maxWidth: .infinity)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radius))
+    }
+}
+
+/// A quiet amber note, e.g. "Borrowers cannot find this car until you drop its pin."
+struct AmberNote: View {
+    let message: String
+
+    var body: some View {
+        Label(message, systemImage: "exclamationmark.circle.fill")
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(Theme.unsure)
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.unsure.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
     }
 }
 
@@ -63,46 +119,103 @@ struct LockerCodeView: View {
         let code = Rules.lockerCode(bookingId)
         Card {
             Label("Key locker code", systemImage: "lock.open.fill")
-                .font(.headline).foregroundStyle(Theme.green)
+                .font(.headline).foregroundStyle(Theme.text)
             HStack(spacing: 10) {
                 ForEach(Array(code.enumerated()), id: \.offset) { _, digit in
                     Text(String(digit))
                         .font(.system(size: 44, weight: .bold, design: .rounded))
-                        .foregroundStyle(Theme.green)
+                        .foregroundStyle(.black)
                         .frame(width: 58, height: 72)
-                        .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 12))
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.green.opacity(0.4)))
+                        .background(.white, in: RoundedRectangle(cornerRadius: 8))
                 }
             }
-            .frame(maxWidth: .infinity)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Code \(code.map(String.init).joined(separator: " "))")
-            Text("Unlocked by your pickup photos. A made-up code: there is no real locker.")
+            Text("Unlocked by your pickup photos. The code is made up for this demo: there is no real locker yet.")
                 .font(.caption).foregroundStyle(Theme.textSoft)
         }
     }
 }
 
-/// Where the owner parked. A fixed map, no panning.
+/// The parking pin on a fixed map, with the spot number riding on it.
 struct ParkingMapView: View {
-    let car: Car
+    let pin: Pin
+    var spot: String?
 
     var body: some View {
-        let airport = Airport.named(car.airport)
-        let coordinate = car.pin.map { CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude) }
-            ?? airport?.coordinate ?? .init(latitude: 42.2124, longitude: -83.3534)
-        Card {
-            Label("Find the car", systemImage: "mappin.and.ellipse")
-                .font(.headline).foregroundStyle(Theme.green)
-            Map(initialPosition: .camera(MapCamera(centerCoordinate: coordinate, distance: 1800)),
-                interactionModes: []) {
-                Marker(car.model, systemImage: "car.fill", coordinate: coordinate).tint(Theme.green)
+        let coordinate = CLLocationCoordinate2D(latitude: pin.lat, longitude: pin.lng)
+        Map(initialPosition: .camera(MapCamera(centerCoordinate: coordinate, distance: 700)), interactionModes: []) {
+            // Centred on the car badge, so the spot label fits on small maps too.
+            Annotation(spot ?? "", coordinate: coordinate, anchor: .center) { CarPinView(spot: spot) }
+                .annotationTitles(.hidden)
+        }
+        .mapStyle(.standard(pointsOfInterest: .excludingAll))
+        .id("\(pin.lat),\(pin.lng)")
+    }
+}
+
+/// The green pin: a car badge with the spot number under it when there is one.
+struct CarPinView: View {
+    var spot: String?
+
+    var body: some View {
+        VStack(spacing: 2) {
+            if let spot, !spot.isEmpty {
+                Text(spot)
+                    .font(.caption.weight(.bold)).monospacedDigit()
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 7).padding(.vertical, 3)
+                    .background(.white, in: Capsule())
             }
-            .mapStyle(.standard(pointsOfInterest: .excludingAll))
-            .frame(height: 180)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            Text(car.pin?.note.isEmpty == false ? car.pin!.note : "Parked at \(airport?.name ?? car.airport)")
-                .font(.subheadline).foregroundStyle(Theme.textSoft)
+            Image(systemName: "car.fill")
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(Theme.onGreen)
+                .frame(width: 34, height: 34)
+                .background(Theme.green, in: Circle())
+                .overlay(Circle().stroke(.black, lineWidth: 2))
+            Rectangle().fill(.black).frame(width: 2, height: 8)
+        }
+    }
+}
+
+/// For the borrower: where the car is, the spot number, and a way into Maps.
+struct WhereItIs: View {
+    let car: Car
+    let owner: String
+    let returning: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(returning ? "Bring it back to the same spot" : "Find the car")
+                        .font(.title3.bold()).foregroundStyle(Theme.text)
+                    Text(car.pin == nil ? "\(owner) has not pinned the parking spot yet." : "Pinned by \(owner).")
+                        .font(.subheadline).foregroundStyle(Theme.textSoft)
+                }
+                Spacer()
+                if let spot = car.spot {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text("Spot").font(.caption).foregroundStyle(Theme.textSoft)
+                        Text(spot).font(.title2.bold()).monospacedDigit().foregroundStyle(Theme.text)
+                    }
+                    .padding(.horizontal, 14).padding(.vertical, 8)
+                    .background(Theme.surface, in: RoundedRectangle(cornerRadius: 8))
+                }
+            }
+            if let pin = car.pin {
+                ParkingMapView(pin: pin, spot: car.spot)
+                    .frame(height: 220)
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.radius))
+                Button {
+                    let item = MKMapItem(location: CLLocation(latitude: pin.lat, longitude: pin.lng), address: nil)
+                    item.name = car.spot.map { "\(car.model), spot \($0)" } ?? car.model
+                    item.openInMaps()
+                } label: {
+                    Label("Open in Maps", systemImage: "arrow.up.forward.square")
+                }
+                .buttonStyle(.secondary)
+            }
         }
     }
 }
@@ -113,17 +226,14 @@ struct ImpactView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .firstTextBaseline, spacing: 10) {
-                Text("$\(days * Config.rentalCostPerDayUSDEstimate)")
-                    .font(.system(size: 54, weight: .heavy, design: .rounded))
-                    .monospacedDigit()
-                Text(Config.impactLabel).font(.headline)
-            }
+            Text("$\(days * Config.rentalCostPerDayUSDEstimate)")
+                .font(.system(size: 50, weight: .bold))
+                .monospacedDigit()
+            Text(Config.impactLabel).font(.headline)
             Text("\(plural(days, "day")) at about $\(Config.rentalCostPerDayUSDEstimate) a day for a rental car. No money changed hands.")
                 .font(.subheadline)
-                .opacity(0.8)
         }
-        .foregroundStyle(.black)
+        .foregroundStyle(Theme.onGreen)
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.green, in: RoundedRectangle(cornerRadius: Theme.radius))
@@ -140,5 +250,18 @@ struct StoredPhoto: View {
         } else {
             Theme.surfaceRaised.overlay(Image(systemName: "photo").foregroundStyle(Theme.textSoft))
         }
+    }
+}
+
+/// A round initial for a person, e.g. "A" for Avery.
+struct Initial: View {
+    let name: String
+
+    var body: some View {
+        Text(String(name.prefix(1)))
+            .font(.subheadline.bold())
+            .foregroundStyle(Theme.text)
+            .frame(width: 32, height: 32)
+            .background(Theme.surfaceRaised, in: Circle())
     }
 }

@@ -6,30 +6,40 @@ struct ContentView: View {
     @Environment(AppStore.self) private var store
     @State private var tab: AppTab = .find
     @State private var tripsPath: [String] = [] // booking ids
+    @State private var lendPath: [LendRoute] = []
 
     var body: some View {
         TabView(selection: $tab) {
             Tab("Find a car", systemImage: "magnifyingglass", value: .find) {
                 NavigationStack {
-                    FindCarView { bookingId in
+                    FindCarView(onBooked: { bookingId in
                         tripsPath = [bookingId]
                         tab = .trips
-                    }
-                    .navigationTitle("Find a car")
+                    }, onLend: {
+                        lendPath = [.newCar]
+                        tab = .lend
+                    })
                     .toolbar { AccountMenu() }
                 }
             }
             Tab("Lend", systemImage: "key.fill", value: .lend) {
-                NavigationStack {
-                    LendView()
+                NavigationStack(path: $lendPath) {
+                    LendView(path: $lendPath)
                         .navigationTitle("Lend my car")
                         .toolbar { AccountMenu() }
+                        .navigationDestination(for: LendRoute.self) { route in
+                            switch route {
+                            case .newCar: ListCarView(path: $lendPath)
+                            case .spot(let carId): SpotEditorView(path: $lendPath, carId: carId)
+                            case .trip(let bookingId): TripDetailView(bookingId: bookingId)
+                            }
+                        }
                 }
             }
             Tab("Trips", systemImage: "suitcase.rolling.fill", value: .trips) {
                 NavigationStack(path: $tripsPath) {
-                    TripsView()
-                        .navigationTitle("My trips")
+                    TripsView(onFind: { tab = .find })
+                        .navigationTitle("Trips")
                         .toolbar { AccountMenu() }
                         .navigationDestination(for: String.self) { TripDetailView(bookingId: $0) }
                 }
@@ -37,7 +47,7 @@ struct ContentView: View {
         }
         .tint(Theme.green)
         .preferredColorScheme(.dark)
-        .onChange(of: store.currentUserId) { tripsPath = [] }
+        .onChange(of: store.currentUserId) { tripsPath = []; lendPath = [] }
     }
 }
 
@@ -70,7 +80,7 @@ struct AccountMenu: ToolbarContent {
                     Image(systemName: "person.crop.circle.fill")
                     Text(store.currentUser?.name.components(separatedBy: " ").first ?? "?")
                     Text("\(store.currentUser?.credits ?? 0) cr")
-                        .foregroundStyle(.black)
+                        .foregroundStyle(Theme.onGreen)
                         .padding(.horizontal, 7).padding(.vertical, 2)
                         .background(Theme.green, in: Capsule())
                 }

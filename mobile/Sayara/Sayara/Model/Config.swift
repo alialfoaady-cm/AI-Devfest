@@ -23,6 +23,9 @@ enum Config {
     static let inspectionServerURL: URL? = nil
 }
 
+/// `latitude`/`longitude` is where the map opens before an owner drops a pin: the parking garage
+/// Google Maps lists for the McNamara terminal (DTW) and Terminal 1 (YYZ). Same as AIRPORT_PARKING
+/// in the web app's lib/config.ts.
 struct Airport: Identifiable, Hashable {
     let code: String
     let name: String
@@ -32,8 +35,8 @@ struct Airport: Identifiable, Hashable {
     var coordinate: CLLocationCoordinate2D { .init(latitude: latitude, longitude: longitude) }
 
     static let all = [
-        Airport(code: "DTW", name: "Detroit Metro", latitude: 42.2124, longitude: -83.3534),
-        Airport(code: "YYZ", name: "Toronto Pearson", latitude: 43.6777, longitude: -79.6248),
+        Airport(code: "DTW", name: "Detroit Metro", latitude: 42.2068, longitude: -83.3555),
+        Airport(code: "YYZ", name: "Toronto Pearson", latitude: 43.6831, longitude: -79.6135),
     ]
 
     static func named(_ code: String) -> Airport? { all.first { $0.code == code } }

@@ -258,6 +258,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Sayara;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Sayara takes six photos of the car at pickup and return so damage can be compared.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Sayara uses your location once, to drop the parking pin where your car is.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -298,6 +299,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Sayara;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Sayara takes six photos of the car at pickup and return so damage can be compared.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Sayara uses your location once, to drop the parking pin where your car is.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;

@@ -107,15 +107,30 @@ enum Rules {
 
     // MARK: Lending and photo check
 
+    /// Lists a car and returns its id. The pin and spot come next, in their own step (setParking).
+    @discardableResult
     static func listCar(_ state: inout AppState, ownerId: String, airport: String, model: String,
-                        seats: Int, from: String, to: String, pin: ParkingPin?) throws {
+                        seats: Int, from: String, to: String, photo: String?) throws -> String {
         let name = model.trimmingCharacters(in: .whitespaces)
-        guard !name.isEmpty else { throw RuleError("Give the car a short description, like \"Blue hatchback\".") }
-        guard tripDays(from, to) >= 1 else { throw RuleError("You must be away for at least 1 day.") }
-        guard seats >= 1 else { throw RuleError("A car needs at least 1 seat.") }
-        state.cars.append(Car(id: "car-\(state.cars.count + 1)-\(UUID().uuidString.prefix(4).lowercased())",
-                              ownerId: ownerId, airport: airport, model: name, seats: seats,
-                              from: from, to: to, pin: pin))
+        guard !name.isEmpty else { throw RuleError("Name the car, for example 2019 Honda Civic.") }
+        guard (1...9).contains(seats) else { throw RuleError("Seats must be a number from 1 to 9.") }
+        guard Airport.named(airport) != nil else { throw RuleError("Pick one of the airports in the list.") }
+        guard tripDays(from, to) >= 1 else { throw RuleError("The day you land must be after the day you fly out.") }
+        let id = "car-\(state.cars.count + 1)-\(UUID().uuidString.prefix(4).lowercased())"
+        state.cars.append(Car(id: id, ownerId: ownerId, airport: airport, model: name, seats: seats,
+                              from: from, to: to, pin: nil, spot: nil, photo: photo))
+        return id
+    }
+
+    /// Where the owner parked: the pin on the map and the painted bay number (up to 8 characters).
+    static func setParking(_ state: inout AppState, carId: String, ownerId: String, pin: Pin, spot: String) throws {
+        guard let index = state.cars.firstIndex(where: { $0.id == carId && $0.ownerId == ownerId }) else {
+            throw RuleError("That car is not yours.")
+        }
+        guard abs(pin.lat) <= 90, abs(pin.lng) <= 180 else { throw RuleError("Drop the pin on the map first.") }
+        let trimmed = String(spot.trimmingCharacters(in: .whitespaces).prefix(8))
+        state.cars[index].pin = pin
+        state.cars[index].spot = trimmed.isEmpty ? nil : trimmed
     }
 
     static func savePickup(_ state: inout AppState, bookingId: String, photos: [Slot: String]) throws {

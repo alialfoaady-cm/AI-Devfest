@@ -2,15 +2,18 @@ import SwiftUI
 import PhotosUI
 import UIKit
 
+/// What a tile shows while the return photos are being compared.
+enum SlotStatus: Equatable {
+    case waiting, checking
+    case done(Verdict)
+}
+
 /// The same six photos at pickup and at return. Tap a tile to take or choose its photo.
 struct PhotoCaptureGrid: View {
     @Binding var photos: [Slot: String]
-    var disabled = false
+    var status: [Slot: SlotStatus]? = nil
 
     @State private var active: Slot?
-    @State private var showCamera = false
-    @State private var showLibrary = false
-    @State private var libraryItem: PhotosPickerItem?
     @State private var error: String?
 
     private let columns = [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
@@ -21,41 +24,19 @@ struct PhotoCaptureGrid: View {
                 ForEach(Slot.allCases) { slot in
                     Button { active = slot } label: { tile(slot) }
                         .buttonStyle(.plain)
-                        .disabled(disabled)
-                        .confirmationDialog("\(slot.label) photo",
-                                            isPresented: Binding(get: { active == slot && !showCamera && !showLibrary },
-                                                                 set: { if !$0 && !showCamera && !showLibrary { active = nil } }),
-                                            titleVisibility: .visible) {
-                            if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                                Button("Take photo") { showCamera = true }
-                            }
-                            Button("Choose from library") { showLibrary = true }
+                        // Not .disabled: that fades the tiles, and the results on them must stay readable.
+                        .allowsHitTesting(status == nil)
+                        .photoSource(isPresented: Binding(get: { active == slot }, set: { if !$0 { active = nil } }),
+                                     title: "\(slot.label) photo", outline: slot.symbol) { image in
+                            store(image, slot)
                         }
                 }
             }
             if let error { ErrorBanner(message: error) }
         }
-        .fullScreenCover(isPresented: $showCamera, onDismiss: { active = nil }) {
-            CameraView(slot: active ?? .front) { image in store(image) }
-                .ignoresSafeArea()
-        }
-        .photosPicker(isPresented: $showLibrary, selection: $libraryItem, matching: .images)
-        .onChange(of: libraryItem) {
-            guard let item = libraryItem else { return }
-            Task {
-                if let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) {
-                    store(image)
-                } else {
-                    error = "That photo could not be loaded."
-                }
-                libraryItem = nil
-                active = nil
-            }
-        }
     }
 
-    private func store(_ image: UIImage) {
-        guard let slot = active else { return }
+    private func store(_ image: UIImage, _ slot: Slot) {
         do {
             photos[slot] = try PhotoStore.save(image)
             error = nil
@@ -67,6 +48,7 @@ struct PhotoCaptureGrid: View {
     private func tile(_ slot: Slot) -> some View {
         let name = photos[slot]
         let dark = name.map { PhotoStore.isTooDark($0, slot: slot) } ?? false
+        let badge = badge(slot, hasPhoto: name != nil, dark: dark)
         return ZStack(alignment: .bottomLeading) {
             if name != nil {
                 StoredPhoto(name: name)
@@ -80,29 +62,104 @@ struct PhotoCaptureGrid: View {
                     .foregroundStyle(Theme.green.opacity(0.8))
                 }
             }
+            if status?[slot] == .checking {
+                Color.black.opacity(0.45)
+                ProgressView().tint(.white).frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
             HStack(spacing: 4) {
-                Image(systemName: name == nil ? "circle" : (dark ? "exclamationmark.triangle.fill" : "checkmark.circle.fill"))
-                Text(dark ? "\(slot.label) · too dark" : slot.label)
+                Image(systemName: badge.symbol)
+                Text(badge.text)
             }
             .font(.caption.weight(.semibold))
-            .foregroundStyle(name == nil ? Theme.text : (dark ? .black : .black))
+            .foregroundStyle(badge.ink)
             .padding(.horizontal, 8).padding(.vertical, 4)
-            .background(name == nil ? Color.black.opacity(0.5) : (dark ? Theme.unsure : Theme.green), in: Capsule())
+            .background(badge.fill, in: Capsule())
             .padding(8)
         }
         .frame(height: 110)
         .frame(maxWidth: .infinity)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(RoundedRectangle(cornerRadius: 12)
-            .stroke(name == nil ? Theme.line : Theme.green.opacity(0.6),
-                    style: StrokeStyle(lineWidth: 1, dash: name == nil ? [5] : [])))
+            .stroke(badge.border, style: StrokeStyle(lineWidth: badge.border == Theme.flag ? 2 : 1, dash: name == nil ? [5] : [])))
         .contentShape(Rectangle())
+        .animation(.easeOut(duration: 0.25), value: status?[slot])
+    }
+
+    private struct Badge {
+        var symbol: String, text: String, ink: Color, fill: Color, border: Color
+    }
+
+    private func badge(_ slot: Slot, hasPhoto: Bool, dark: Bool) -> Badge {
+        switch status?[slot] {
+        case .checking?:
+            return Badge(symbol: "sparkle.magnifyingglass", text: "Comparing", ink: .white, fill: .black.opacity(0.6), border: Theme.line)
+        case .done(.clear)?:
+            return Badge(symbol: "checkmark", text: "No change", ink: Theme.onGreen, fill: Theme.green, border: Theme.green)
+        case .done(.flagged)?:
+            return Badge(symbol: "exclamationmark.triangle.fill", text: "Flagged", ink: .black, fill: Theme.flag, border: Theme.flag)
+        case .done(.unsure)?:
+            return Badge(symbol: "questionmark", text: "Unsure", ink: .black, fill: Theme.unsure, border: Theme.unsure)
+        case .waiting?, nil:
+            break
+        }
+        if !hasPhoto {
+            return Badge(symbol: "circle", text: slot.label, ink: Theme.text, fill: .black.opacity(0.5), border: Theme.line)
+        }
+        if dark {
+            return Badge(symbol: "exclamationmark.triangle.fill", text: "\(slot.label) · too dark", ink: .black, fill: Theme.unsure, border: Theme.unsure)
+        }
+        return Badge(symbol: "checkmark.circle.fill", text: slot.label, ink: Theme.onGreen, fill: Theme.green, border: Theme.green.opacity(0.6))
+    }
+}
+
+// MARK: - Take or choose a photo
+
+extension View {
+    /// Asks "Take photo" or "Choose from library", then hands back the picked image.
+    func photoSource(isPresented: Binding<Bool>, title: String, outline: String,
+                     onImage: @escaping (UIImage) -> Void) -> some View {
+        modifier(PhotoSourceModifier(isPresented: isPresented, title: title, outline: outline, onImage: onImage))
+    }
+}
+
+private struct PhotoSourceModifier: ViewModifier {
+    @Binding var isPresented: Bool
+    let title: String
+    let outline: String
+    let onImage: (UIImage) -> Void
+
+    @State private var showCamera = false
+    @State private var showLibrary = false
+    @State private var item: PhotosPickerItem?
+
+    func body(content: Content) -> some View {
+        content
+            .confirmationDialog(title, isPresented: $isPresented, titleVisibility: .visible) {
+                if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                    Button("Take photo") { showCamera = true }
+                }
+                Button("Choose from library") { showLibrary = true }
+            }
+            .fullScreenCover(isPresented: $showCamera) {
+                CameraView(title: title, outline: outline, onPhoto: onImage).ignoresSafeArea()
+            }
+            .photosPicker(isPresented: $showLibrary, selection: $item, matching: .images)
+            .onChange(of: item) {
+                guard let item else { return }
+                Task {
+                    if let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) {
+                        onImage(image)
+                    }
+                    self.item = nil
+                }
+            }
     }
 }
 
 /// The system camera with an outline on top so every photo is taken from the same angle.
 private struct CameraView: UIViewControllerRepresentable {
-    let slot: Slot
+    let title: String
+    let outline: String
     let onPhoto: (UIImage) -> Void
     @Environment(\.dismiss) private var dismiss
 
@@ -110,7 +167,7 @@ private struct CameraView: UIViewControllerRepresentable {
         let picker = UIImagePickerController()
         picker.sourceType = .camera
         picker.delegate = context.coordinator
-        let overlay = UIHostingController(rootView: CameraOutline(slot: slot)).view!
+        let overlay = UIHostingController(rootView: CameraOutline(title: title, symbol: outline)).view!
         overlay.backgroundColor = .clear
         overlay.isUserInteractionEnabled = false
         overlay.frame = picker.view.bounds
@@ -138,19 +195,20 @@ private struct CameraView: UIViewControllerRepresentable {
 }
 
 private struct CameraOutline: View {
-    let slot: Slot
+    let title: String
+    let symbol: String
 
     var body: some View {
         VStack(spacing: 12) {
-            Text("\(slot.label): fit the car inside the frame")
-                .font(.headline).foregroundStyle(.black)
+            Text("\(title): fit the car inside the frame")
+                .font(.headline).foregroundStyle(Theme.onGreen)
                 .padding(.horizontal, 12).padding(.vertical, 6)
                 .background(Theme.green, in: Capsule())
                 .padding(.top, 70)
             RoundedRectangle(cornerRadius: 24)
                 .stroke(Theme.green, style: StrokeStyle(lineWidth: 3, dash: [12, 8]))
-                .frame(height: slot == .dashboard || slot == .interior ? 240 : 300)
-                .overlay(Image(systemName: slot.symbol).font(.system(size: 90)).foregroundStyle(Theme.green.opacity(0.35)))
+                .frame(height: 280)
+                .overlay(Image(systemName: symbol).font(.system(size: 90)).foregroundStyle(Theme.green.opacity(0.35)))
                 .padding(.horizontal, 24)
             Spacer()
         }

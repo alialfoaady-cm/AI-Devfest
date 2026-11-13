@@ -35,11 +35,10 @@ struct User: Codable, Identifiable, Equatable {
     var credits: Int
 }
 
-/// Where the owner parked. A pin on the map plus a short note such as "Lot P3, row C".
-struct ParkingPin: Codable, Equatable {
-    var latitude: Double
-    var longitude: Double
-    var note: String
+/// Where the owner left the car, dropped on the map. Same shape as `Pin` in the web app.
+struct Pin: Codable, Equatable {
+    var lat: Double
+    var lng: Double
 }
 
 /// `from`/`to` is the owner's away window. `to` is the day the owner lands: a hard cutoff.
@@ -51,7 +50,12 @@ struct Car: Codable, Identifiable, Equatable {
     var seats: Int
     var from: String
     var to: String
-    var pin: ParkingPin?
+    /// Where the owner left it, dropped on the map.
+    var pin: Pin?
+    /// The painted bay number, as the owner typed it, e.g. "B-214".
+    var spot: String?
+    /// A photo of the car for its listing: a file name in the photo folder.
+    var photo: String?
 }
 
 enum BookingStatus: String, Codable {
@@ -127,6 +131,20 @@ struct AppState: Codable, Equatable {
     func inspection(_ bookingId: String, _ phase: InspectionPhase) -> Inspection? {
         inspections.first { $0.bookingId == bookingId && $0.phase == phase }
     }
+
+    /// Where a trip is: waiting for pickup photos, on the road, or returned.
+    func stage(_ bookingId: String) -> TripStage {
+        if booking(bookingId)?.status == .returned { return .returned }
+        return inspection(bookingId, .pickup) == nil ? .pickup : .driving
+    }
+
+    func firstName(_ userId: String) -> String {
+        user(userId)?.name.components(separatedBy: " ").first ?? "Someone"
+    }
+}
+
+enum TripStage: Int {
+    case pickup, driving, returned
 }
 
 struct RuleError: LocalizedError {

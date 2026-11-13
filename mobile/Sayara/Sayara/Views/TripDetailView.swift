@@ -1,99 +1,128 @@
 import SwiftUI
 
-/// One booking from pickup to return: photos, locker code, map, return check, report.
+/// One booking from pickup to return. The borrower sees the steps in the order they need them;
+/// the owner sees where the trip is; both see the report once the car is back.
 struct TripDetailView: View {
     @Environment(AppStore.self) private var store
     let bookingId: String
 
     @State private var pickupPhotos: [Slot: String] = [:]
     @State private var returnPhotos: [Slot: String] = [:]
-    @State private var checking: Int?
+    @State private var status: [Slot: SlotStatus]?
     @State private var error: String?
 
     var body: some View {
         let state = store.state
         if let booking = state.booking(bookingId), let car = state.car(booking.carId) {
-            let pickup = state.inspection(bookingId, .pickup)
-            let returned = state.inspection(bookingId, .return)
+            let stage = state.stage(bookingId)
+            let owner = state.firstName(car.ownerId)
+            let borrower = state.firstName(booking.userId)
             let isBorrower = booking.userId == store.currentUserId
             let isOwner = car.ownerId == store.currentUserId
 
             Screen {
-                Card {
-                    CarSummary(car: car, owner: state.user(car.ownerId))
-                    HStack {
-                        Pill(text: "\(Day.short(booking.from)) – \(Day.short(booking.to))", symbol: "calendar")
-                        Pill(text: plural(booking.days, "credit"), symbol: "creditcard")
-                        Spacer()
-                        Pill(text: booking.status == .returned ? "Returned" : "Booked",
-                             color: booking.status == .returned ? Theme.textSoft : Theme.green)
-                    }
-                    if isOwner {
-                        Text("Borrowed by \(state.user(booking.userId)?.name ?? "someone"). You earn \(plural(booking.days, "credit")) when it comes back.")
-                            .font(.caption).foregroundStyle(Theme.textSoft)
-                    }
-                }
+                header(car: car, booking: booking, stage: stage, owner: owner, borrower: borrower, isOwner: isOwner)
 
                 if let error { ErrorBanner(message: error) }
 
-                if pickup == nil {
-                    if isBorrower {
-                        pickupStep
-                    } else {
-                        Card { Text("Waiting for the borrower's pickup photos.").foregroundStyle(Theme.textSoft) }
+                if isBorrower && stage == .pickup {
+                    WhereItIs(car: car, owner: owner, returning: false)
+                    pickupStep
+                }
+                if isBorrower && stage == .driving, let pickup = state.inspection(bookingId, .pickup) {
+                    LockerCodeView(bookingId: bookingId)
+                    WhereItIs(car: car, owner: owner, returning: true)
+                    returnStep(pickup)
+                }
+                if isOwner && stage != .returned {
+                    Card {
+                        Text((stage == .pickup
+                              ? "\(borrower) has booked your car and has not picked it up yet."
+                              : "\(borrower) has your car. The pickup photos are saved.")
+                             + " You earn \(plural(booking.days, "credit")) when it comes back.")
+                            .foregroundStyle(Theme.text)
                     }
-                } else if returned == nil {
-                    if isBorrower {
-                        LockerCodeView(bookingId: bookingId)
-                        ParkingMapView(car: car)
-                        returnStep(pickup!)
-                    } else {
-                        Card {
-                            Label("Picked up. Six pickup photos are on file.", systemImage: "checkmark.seal.fill")
-                                .foregroundStyle(Theme.green)
-                        }
-                    }
-                } else if let pickup, let returned {
+                }
+                if stage == .returned && (isBorrower || isOwner),
+                   let pickup = state.inspection(bookingId, .pickup), let returned = state.inspection(bookingId, .return) {
+                    (Text("Car returned. ")
+                     + Text(isOwner ? "You earned \(plural(booking.days, "credit"))." : "\(owner) earned \(plural(booking.days, "credit")).")
+                        .foregroundStyle(Theme.greenText))
+                        .font(.title2.bold())
+                        .foregroundStyle(Theme.text)
                     ImpactView(days: booking.days)
                     CompareReportView(pickup: pickup, returned: returned, canDecide: isOwner)
+                }
+                if !isBorrower && !isOwner {
+                    Card { Text("This trip belongs to other users. Switch user at the top to see it.").foregroundStyle(Theme.textSoft) }
                 }
             }
             .navigationTitle(car.model)
             .navigationBarTitleDisplayMode(.inline)
         } else {
-            Screen { Text("This trip no longer exists.").foregroundStyle(Theme.textSoft) }
+            Screen { Text("This trip no longer exists. The sample data may have been reset.").foregroundStyle(Theme.textSoft) }
         }
+    }
+
+    private func header(car: Car, booking: Booking, stage: TripStage, owner: String, borrower: String, isOwner: Bool) -> some View {
+        HStack(alignment: .top, spacing: 14) {
+            CarPhotoView(car: car)
+                .frame(width: 110, height: 82)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            VStack(alignment: .leading, spacing: 6) {
+                Text("\(car.model) at \(car.airport)").font(.title3.weight(.heavy)).foregroundStyle(Theme.text)
+                Text("\(Day.short(booking.from)) to \(Day.short(booking.to)). \(isOwner ? "Borrowed by \(borrower)." : "Lent by \(owner).")")
+                    .font(.subheadline).foregroundStyle(Theme.textSoft)
+                progress(stage)
+            }
+        }
+    }
+
+    /// Pick up, Drive, Return: three bars, filled up to where the trip is.
+    private func progress(_ stage: TripStage) -> some View {
+        let steps = ["Pick up", "Drive", "Return"]
+        return HStack(spacing: 6) {
+            ForEach(Array(steps.enumerated()), id: \.offset) { index, label in
+                VStack(alignment: .leading, spacing: 4) {
+                    Capsule().fill(index <= stage.rawValue ? Theme.text : Theme.line).frame(height: 4)
+                    Text(label).font(.caption.weight(.medium))
+                        .foregroundStyle(index == stage.rawValue ? Theme.text : Theme.textSoft)
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityValue(index < stage.rawValue ? "done" : index == stage.rawValue ? "now" : "later")
+            }
+        }
+        .padding(.top, 4)
+        .animation(.easeOut(duration: 0.3), value: stage)
     }
 
     private var pickupStep: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionTitle(text: "Step 1 · Pickup photos",
-                         detail: "Take six photos before you drive. The locker code unlocks when they are done.")
+            SectionTitle(text: "Photograph it before you drive",
+                         detail: "Six photos record the car as you found it. They unlock the key locker.")
             PhotoCaptureGrid(photos: $pickupPhotos)
-            Button("Use sample pickup photos") { useSamples(.pickup) }.buttonStyle(.secondary)
-            Button("Save photos and unlock the key") { savePickup() }
+            Button("Save photos and get the key code") { savePickup() }
                 .buttonStyle(.primary)
                 .disabled(pickupPhotos.count < Slot.allCases.count)
+            Button("Use sample photos") { useSamples(.pickup) }.buttonStyle(.secondary)
             missing(pickupPhotos)
         }
     }
 
     private func returnStep(_ pickup: Inspection) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionTitle(text: "Step 2 · Return photos",
-                         detail: "Back at the airport, take the same six photos. The AI compares each one with its pickup photo.")
-            PhotoCaptureGrid(photos: $returnPhotos, disabled: checking != nil)
-            if let checking {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Comparing \(Slot.allCases[checking].label.lowercased()) photos, \(checking + 1) of \(Slot.allCases.count)")
-                        .font(.subheadline.weight(.semibold))
-                    ProgressView(value: Double(checking) + 0.5, total: Double(Slot.allCases.count))
-                }
+            SectionTitle(text: "Return photos",
+                         detail: "Back at the airport, take the same six photos. Each one is compared with its pickup photo.")
+            PhotoCaptureGrid(photos: $returnPhotos, status: status)
+            if let status {
+                let checking = Slot.allCases.first { status[$0] == .checking }
+                Text(checking.map { "Comparing the \($0.label.lowercased()) photos." } ?? "All six pairs compared.")
+                    .font(.subheadline.weight(.semibold)).foregroundStyle(Theme.text)
             } else {
-                Button("Use sample return photos") { useSamples(.return) }.buttonStyle(.secondary)
-                Button("Check photos and return car") { Task { await checkAndReturn(pickup) } }
+                Button("Check photos and return the car") { Task { await checkAndReturn(pickup) } }
                     .buttonStyle(.primary)
                     .disabled(returnPhotos.count < Slot.allCases.count)
+                Button("Use sample photos") { useSamples(.return) }.buttonStyle(.secondary)
                 missing(returnPhotos)
             }
         }
@@ -129,15 +158,19 @@ struct TripDetailView: View {
         error = nil
         let service = Inspector.current
         var results: [Slot: InspectionResult] = [:]
+        status = Dictionary(uniqueKeysWithValues: Slot.allCases.map { ($0, SlotStatus.waiting) })
         // One pair at a time: steady progress on screen, and no burst against a rate limit.
-        for (index, slot) in Slot.allCases.enumerated() {
-            checking = index
-            guard let before = pickup.photos[slot].flatMap(PhotoStore.load),
-                  let after = returnPhotos[slot].flatMap(PhotoStore.load) else { continue }
-            if let result = await service.compare(before: before, after: after, slot: slot) {
-                results[slot] = result
+        for slot in Slot.allCases {
+            status?[slot] = .checking
+            var result: InspectionResult?
+            if let before = pickup.photos[slot].flatMap({ PhotoStore.load($0) }),
+               let after = returnPhotos[slot].flatMap({ PhotoStore.load($0) }) {
+                result = await service.compare(before: before, after: after, slot: slot)
             }
+            results[slot] = result
+            status?[slot] = .done(Verdict.slot(result))
         }
+        try? await Task.sleep(for: .milliseconds(600)) // let the last verdict be seen
         do {
             try store.update {
                 try Rules.saveReturn(&$0, bookingId: bookingId, photos: returnPhotos,
@@ -146,6 +179,6 @@ struct TripDetailView: View {
         } catch {
             self.error = error.localizedDescription
         }
-        checking = nil
+        status = nil
     }
 }
