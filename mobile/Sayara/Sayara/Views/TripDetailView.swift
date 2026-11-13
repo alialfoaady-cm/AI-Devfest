@@ -25,6 +25,9 @@ struct TripDetailView: View {
             Screen {
                 header(car: car, booking: booking, stage: stage, owner: owner, borrower: borrower, isOwner: isOwner)
 
+                // The chat opens once the car is booked, for the two people on the trip only.
+                if isBorrower || isOwner { MessageButton(booking: booking) }
+
                 if let error { ErrorBanner(message: error) }
 
                 if isBorrower && stage == .pickup {

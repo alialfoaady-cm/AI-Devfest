@@ -154,11 +154,44 @@ struct Inspection: Codable, Identifiable, Equatable {
     var ownerDecision: [String: OwnerDecision]
 }
 
+/// One chat message on a trip, between its borrower and the car's owner.
+struct ChatMessage: Codable, Identifiable, Equatable {
+    let id: String
+    var bookingId: String
+    var senderId: String
+    var text: String
+    var sentAt: Date
+}
+
 struct AppState: Codable, Equatable {
     var users: [User]
     var cars: [Car]
     var bookings: [Booking]
     var inspections: [Inspection]
+    /// Phone-only for now: the web app has no chat yet.
+    var messages: [ChatMessage] = []
+
+    init(users: [User], cars: [Car], bookings: [Booking], inspections: [Inspection], messages: [ChatMessage] = []) {
+        self.users = users
+        self.cars = cars
+        self.bookings = bookings
+        self.inspections = inspections
+        self.messages = messages
+    }
+
+    // Saved data from before chat existed has no "messages": read it as no messages, not as broken data.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        users = try c.decode([User].self, forKey: .users)
+        cars = try c.decode([Car].self, forKey: .cars)
+        bookings = try c.decode([Booking].self, forKey: .bookings)
+        inspections = try c.decode([Inspection].self, forKey: .inspections)
+        messages = try c.decodeIfPresent([ChatMessage].self, forKey: .messages) ?? []
+    }
+
+    func messages(_ bookingId: String) -> [ChatMessage] {
+        messages.filter { $0.bookingId == bookingId }.sorted { $0.sentAt < $1.sentAt }
+    }
 
     func user(_ id: String) -> User? { users.first { $0.id == id } }
     func car(_ id: String) -> Car? { cars.first { $0.id == id } }

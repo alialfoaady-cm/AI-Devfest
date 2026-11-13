@@ -99,6 +99,7 @@ struct LendView: View {
                         : "Earns \(Rules.tripCost(loan.days))",
                      color: returned ? Theme.greenText : Theme.textSoft)
             }
+            if stage != .cancelled { MessageButton(booking: loan) }
             if stage == .driving || stage == .returned {
                 Button(returned ? "Review return photos" : "See the trip") { path.append(.trip(bookingId: loan.id)) }
                     .buttonStyle(.secondary)

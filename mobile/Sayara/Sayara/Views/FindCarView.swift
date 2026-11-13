@@ -188,7 +188,10 @@ private struct BookSheet: View {
         do {
             var booking: Booking?
             try store.update {
-                booking = try Rules.book(&$0, userId: store.currentUserId, carId: car.id, from: from, to: to, creditsUsed: credits)
+                let made = try Rules.book(&$0, userId: store.currentUserId, carId: car.id, from: from, to: to, creditsUsed: credits)
+                booking = made
+                // Booking opens the chat: the owner's hello is its first message.
+                try Rules.sendMessage(&$0, bookingId: made.id, senderId: car.ownerId, text: ChatView.welcome($0, booking: made))
             }
             if let booking { onBooked(booking.id) }
         } catch {

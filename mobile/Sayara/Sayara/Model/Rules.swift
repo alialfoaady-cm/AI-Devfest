@@ -265,6 +265,21 @@ enum Rules {
         state.inspections[index].ownerDecision[findingKey] = decision
     }
 
+    // MARK: Chat
+
+    /// Only the two people on a trip can message each other, and only once the car is booked.
+    static func sendMessage(_ state: inout AppState, bookingId: String, senderId: String, text: String, at date: Date = .now) throws {
+        guard let booking = state.booking(bookingId), let car = state.car(booking.carId),
+              senderId == booking.userId || senderId == car.ownerId else {
+            throw RuleError("Only the borrower and the owner can message about this trip.")
+        }
+        guard booking.status != .cancelled else { throw RuleError("This trip was cancelled, so the chat is closed.") }
+        let body = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !body.isEmpty else { throw RuleError("Write a message first.") }
+        guard body.count <= 500 else { throw RuleError("Keep it under 500 characters.") }
+        state.messages.append(ChatMessage(id: UUID().uuidString, bookingId: bookingId, senderId: senderId, text: body, sentAt: date))
+    }
+
     /// A made-up 4-digit code derived from the booking id. There is no real locker.
     static func lockerCode(_ bookingId: String) -> String {
         var hash = 7
