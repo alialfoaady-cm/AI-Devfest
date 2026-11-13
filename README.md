@@ -137,7 +137,7 @@ returnCar(state, bookingId)                      // marks it returned, pays the 
 | Booking rules | Pure functions in `lib/rules.ts`, one Vitest test per rule in section 6 | Built |
 | Phone photos | `<input type="file" accept="image/*" capture>`, shrunk in the browser to 720 px on the long edge before upload | Built |
 | AI, mock mode | `lib/inspection/mock.ts` returns canned answers so the flow runs with no credentials. This is the default, and the only mode where the drawn sample photos are offered | Built |
-| AI, real | IBM watsonx.ai, called only from the server in `lib/inspection/watsonx.ts` | **Not built yet.** The model is not chosen |
+| AI, real | IBM watsonx.ai, called only from the server in `lib/inspection/watsonx.ts`: an IAM token, then the chat API with the stitched pair and a prompt per slot. Default model `meta-llama/llama-4-maverick-17b-128e-instruct-fp8` (`WATSONX_MODEL_ID` to change). Set `INSPECTION_PROVIDER=watsonx` and the IBM variables | Built. Tested with a mocked IBM; needs a real key to try live |
 | Map | Google Maps JavaScript API for the parking pin (`components/ParkingMap.tsx`). The owner drags the map under a fixed pin; the borrower sees the pin and the spot number | Built. Needs `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` |
 
 An earlier plan used a plain HTML and JavaScript app, and before that Google Gemini and Firebase. Both are replaced. The first Next.js build kept everything in the browser's localStorage with two built-in demo users; that is replaced by real accounts and the server-side data file.

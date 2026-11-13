@@ -3,6 +3,7 @@
 import type { InspectionAdapter } from "@/lib/inspection/adapter";
 import { mockAdapter } from "@/lib/inspection/mock";
 import { parseInspectionResult } from "@/lib/inspection/validate";
+import { watsonxAdapter, watsonxConfig } from "@/lib/inspection/watsonx";
 import { SLOTS, type Slot } from "@/lib/types";
 
 const MAX_IMAGE_CHARS = 4_000_000; // about 3 MB of JPEG; a stitched 1120 px pair is far smaller
@@ -28,10 +29,13 @@ export async function POST(request: Request) {
 
   const name = provider();
   if (name === "watsonx") {
-    // The watsonx adapter (lib/inspection/watsonx.ts) is the next piece of work.
-    return Response.json({ error: "The watsonx adapter is not built yet. Use INSPECTION_PROVIDER=mock." }, { status: 501 });
+    try {
+      watsonxConfig(); // fail fast with a clear message when the IBM variables are missing
+    } catch (error) {
+      return Response.json({ error: (error as Error).message }, { status: 503 });
+    }
   }
-  const adapter: InspectionAdapter = mockAdapter;
+  const adapter: InspectionAdapter = name === "watsonx" ? watsonxAdapter : mockAdapter;
 
   try {
     // result is null when the answer does not validate. The client shows null as "unsure".
