@@ -39,7 +39,7 @@ const draw = (inner, label) => `<svg xmlns="http://www.w3.org/2000/svg" width="$
   <rect width="${W}" height="${H}" fill="#c9ced6"/><rect y="440" width="${W}" height="160" fill="#8b929e"/>
   <rect x="40" y="520" width="14" height="80" fill="#ffc914"/><rect x="746" y="520" width="14" height="80" fill="#ffc914"/>
   ${inner}
-  <text x="24" y="40" font-family="sans-serif" font-size="22" fill="${DARK}">Sample photo: ${label}</text></svg>`;
+  <text x="776" y="40" font-family="sans-serif" font-size="22" text-anchor="end" fill="${DARK}">Sample: ${label}</text></svg>`;
 
 const shots = {
   "pickup-front": end(false), "return-front": end(false),

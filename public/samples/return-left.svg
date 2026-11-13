@@ -6,4 +6,4 @@
   <path d="M345 225 L440 225 L440 298 L285 298 Z M460 225 L550 225 L610 298 L460 298 Z" fill="#b9d4ee"/>
   <rect x="690" y="330" width="26" height="22" rx="4" fill="#ffd34d"/><rect x="88" y="330" width="22" height="26" rx="4" fill="#d83a2e"/>
   <circle cx="230" cy="400" r="46" fill="#1c2433"/><circle cx="230" cy="400" r="20.7" fill="#9aa3b2"/><circle cx="590" cy="400" r="46" fill="#1c2433"/><circle cx="590" cy="400" r="20.7" fill="#9aa3b2"/></g><rect width="800" height="600" fill="#000" opacity="0.45"/>
-  <text x="24" y="40" font-family="sans-serif" font-size="22" fill="#1c2433">Sample photo: return, left</text></svg>
+  <text x="776" y="40" font-family="sans-serif" font-size="22" text-anchor="end" fill="#1c2433">Sample: return, left</text></svg>
