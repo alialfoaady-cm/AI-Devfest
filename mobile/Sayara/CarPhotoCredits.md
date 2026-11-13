@@ -32,3 +32,26 @@ Each file's author and licence are on its Commons page.
 - `toyota-prius.png`: https://commons.wikimedia.org/wiki/File:Toyota_Prius_2.0_HEV_Limited_(V)_–_f_18112022.jpg
 - `toyota-rav4.png`: https://commons.wikimedia.org/wiki/File:2024_Toyota_RAV4_Prime_XSE_Premium_in_Silver_Sky_with_Midnight_Black_roof,_front_left.jpg
 - `toyota-tacoma.png`: https://commons.wikimedia.org/wiki/File:Toyota_Tacoma_(N300)_TRD_1X7A2438.jpg
+
+## Damaged-car test photos (Assets.xcassets/DamageTests)
+
+Real photos used by "Use real test photos" on the pickup and return steps, to try the on-device damage model on real damage.
+All from Wikimedia Commons, resized to 1024 px. Not photos of the listed cars. Each clean photo is the same model as the damaged one, not the same car.
+
+| Asset | Original | Author | Licence |
+|---|---|---|---|
+| damage-altima | [Altima-Accident.jpg](https://commons.wikimedia.org/wiki/File:Altima-Accident.jpg) | Ryanandlenny | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0) |
+| damage-starex | [20171118 damaged Hyundai Grand starex-1.jpg](https://commons.wikimedia.org/wiki/File:20171118_damaged_Hyundai_Grand_starex-1.jpg) | Sim1992 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| damage-astra | [Accidented Car, Ooops Vauxhall Astra.jpg](https://commons.wikimedia.org/wiki/File:Accidented_Car,_Ooops_Vauxhall_Astra.jpg) | Leonora (Ellie) Enking | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0) |
+| damage-esbjerg | [Broken car at Storegade, Esbjerg.jpg](https://commons.wikimedia.org/wiki/File:Broken_car_at_Storegade,_Esbjerg.jpg) | Kent Madsen | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0) |
+| damage-bmw-mirror | [2010-03-08 Shattered side mirror on BMW.jpg](https://commons.wikimedia.org/wiki/File:2010-03-08_Shattered_side_mirror_on_BMW.jpg) | Ildar Sagdejev (Specious) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| clean-altima | [07-08 Nissan Altima 3.5SE.jpg](https://commons.wikimedia.org/wiki/File:07-08_Nissan_Altima_3.5SE.jpg) | IFCAR | Public domain |
+| clean-starex | [Hyundai Grand Starex (BDJ-320) Front.jpg](https://commons.wikimedia.org/wiki/File:Hyundai_Grand_Starex_(BDJ-320)_Front.jpg) | Captainmorlypogi1959 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| clean-astra | [1990 Vauxhall Astra Belmont LXi estate (16147301670).jpg](https://commons.wikimedia.org/wiki/File:1990_Vauxhall_Astra_Belmont_LXi_estate_(16147301670).jpg) | Charlie from United Kingdom | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0) |
+| clean-xsara | [2001 Citroen Xsara L 8V in Silver, Front left, 05-10-23.png](https://commons.wikimedia.org/wiki/File:2001_Citroen_Xsara_L_8V_in_Silver,_Front_left,_05-10-23.png) | PlasticBodyPanels | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0) |
+
+## Damage model (Sayara/Inspection/DamageDetector.mlpackage)
+
+YOLOv11-nano car-damage detector by vineetsarpal, [huggingface.co/vineetsarpal/yolov11n-car-damage](https://huggingface.co/vineetsarpal/yolov11n-car-damage),
+Apache-2.0 (trained with Ultralytics YOLO11, which is AGPL-3.0). Trained on the Roboflow Universe "Automobile Damage Detection" dataset,
+14 damage classes, reported mAP@0.5 of 79.7%. Converted to Core ML with Ultralytics' export (NMS included); runs on the phone.

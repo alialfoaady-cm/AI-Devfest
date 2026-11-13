@@ -98,3 +98,42 @@ private struct SampleCarArt: View {
         }
     }
 }
+
+/// Real photos (Wikimedia Commons, credited in CarPhotoCredits.md) to try the damage model on real damage.
+/// Pickup is an undamaged car of the same model as the damaged return photo (not the same physical car;
+/// free before/after photos of one car don't exist). The interior slot shows the same cracked-mirror photo on
+/// both sides: the damage was already there at pickup, so nothing new should be reported. The dashboard keeps
+/// the drawn odometer photos so the odometer reading can be tested.
+enum RealTestPhotos {
+    /// slot -> (pickup asset, return asset)
+    static let pairs: [Slot: (pickup: String, return: String)] = [
+        .front: ("clean-altima", "damage-altima"),          // Nissan Altima 2007-08, white
+        .back: ("clean-starex", "damage-starex"),           // Hyundai Starex van
+        .left: ("clean-astra", "damage-astra"),             // Vauxhall Astra estate
+        .right: ("clean-xsara", "damage-esbjerg"),          // Citroen Xsara, silver
+        .interior: ("damage-bmw-mirror", "damage-bmw-mirror"),
+    ]
+
+    static func make(_ phase: InspectionPhase) throws -> [Slot: String] {
+        var photos = try SamplePhotos.make(phase)   // dashboard (and a fallback for anything missing)
+        for (slot, pair) in pairs {
+            let name = phase == .pickup ? pair.pickup : pair.return
+            guard let image = UIImage(named: name) else { throw RuleError("Missing test photo \(name).") }
+            photos[slot] = try PhotoStore.save(flatten(image))
+        }
+        return photos
+    }
+
+    /// The car cut-outs are transparent PNGs; put them on a grey car-park backdrop like a real photo.
+    private static func flatten(_ image: UIImage) -> UIImage {
+        let size = CGSize(width: 1024, height: 1024 * image.size.height / max(image.size.width, 1))
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        format.opaque = true
+        return UIGraphicsImageRenderer(size: size, format: format).image { ctx in
+            UIColor(white: 0.55, alpha: 1).setFill()
+            ctx.fill(CGRect(origin: .zero, size: size))
+            image.draw(in: CGRect(origin: .zero, size: size))
+        }
+    }
+}

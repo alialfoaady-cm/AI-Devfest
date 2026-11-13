@@ -169,6 +169,7 @@ struct TripDetailView: View {
                 .buttonStyle(.primary)
                 .disabled(pickupPhotos.count < Slot.allCases.count)
             Button("Use sample photos") { useSamples(.pickup) }.buttonStyle(.secondary)
+            Button("Use real test photos", systemImage: "photo.stack") { useSamples(.pickup, real: true) }.buttonStyle(.secondary)
             missing(pickupPhotos)
         }
     }
@@ -177,6 +178,7 @@ struct TripDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             SectionTitle(text: "Return photos",
                          detail: "Back at the airport, take the same six photos. Each one is compared with its pickup photo.")
+            OnDeviceAIBadge()
             PhotoCaptureGrid(photos: $returnPhotos, status: status)
             if let status {
                 let checking = Slot.allCases.first { status[$0] == .checking }
@@ -186,7 +188,10 @@ struct TripDetailView: View {
                 Button("Check photos and return the car") { Task { await checkAndReturn(pickup) } }
                     .buttonStyle(.primary)
                     .disabled(returnPhotos.count < Slot.allCases.count)
+                // Shown here too: the banner at the top is off screen when this button is tapped.
+                if let error { ErrorBanner(message: error) }
                 Button("Use sample photos") { useSamples(.return) }.buttonStyle(.secondary)
+            Button("Use real test photos", systemImage: "photo.stack") { useSamples(.return, real: true) }.buttonStyle(.secondary)
                 missing(returnPhotos)
             }
         }
@@ -200,9 +205,9 @@ struct TripDetailView: View {
         }
     }
 
-    private func useSamples(_ phase: InspectionPhase) {
+    private func useSamples(_ phase: InspectionPhase, real: Bool = false) {
         do {
-            let photos = try SamplePhotos.make(phase)
+            let photos = try (real ? RealTestPhotos.make(phase) : SamplePhotos.make(phase))
             if phase == .pickup { pickupPhotos = photos } else { returnPhotos = photos }
         } catch {
             self.error = error.localizedDescription
@@ -235,6 +240,12 @@ struct TripDetailView: View {
             status?[slot] = .done(Verdict.slot(result))
         }
         try? await Task.sleep(for: .milliseconds(600)) // let the last verdict be seen
+        // Nothing came back at all: the server is down or not set up. Say so instead of six "unsure"s.
+        if results.isEmpty, let problem = service.lastError {
+            error = problem
+            status = nil
+            return
+        }
         do {
             try store.update {
                 try Rules.saveReturn(&$0, bookingId: bookingId, photos: returnPhotos,

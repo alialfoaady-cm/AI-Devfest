@@ -34,7 +34,10 @@ enum Config {
     static let startingCredits = 7 * creditsPerDay
 
     /// A finding below this confidence is shown as "unsure", never as damage.
-    static let minDamageConfidence = 0.6
+    /// The on-device YOLOv11n damage model scores new damage on real photos at about 0.3 to 0.7, so 0.3 is the
+    /// line for "flagged" (the owner still confirms or disputes). Below it a finding shows as "unsure".
+    /// (The web app's watsonx check uses 0.6.)
+    static let minDamageConfidence = 0.3
 
     /// Long edge, in pixels, of any photo stored or sent for inspection.
     static let maxImageEdgePx: CGFloat = 1120

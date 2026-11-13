@@ -22,7 +22,8 @@ struct CompareReportView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             SectionTitle(text: "Return report",
-                         detail: "Checked by AI (\(returned.aiProvider ?? "unknown")). The AI flags changes; the owner confirms or disputes them.")
+                         detail: "Checked by \(Self.providerLabel(returned.aiProvider)). The AI flags changes; the owner confirms or disputes them.")
+            OnDeviceAIBadge()
 
             summary
 
@@ -88,9 +89,10 @@ struct CompareReportView: View {
 
     private func photo(_ name: String?, _ caption: String, highlight: Bool = false) -> some View {
         ZStack(alignment: .topLeading) {
-            StoredPhoto(name: name)
+            Color.clear
                 .frame(height: 110)
                 .frame(maxWidth: .infinity)
+                .overlay { StoredPhoto(name: name) }   // a wide photo fills the frame instead of widening it
                 .clipped()
             Text(caption)
                 .font(.caption2.weight(.bold))
@@ -153,5 +155,16 @@ struct CompareReportView: View {
 
     private func decide(_ key: String, _ decision: OwnerDecision) {
         try? store.update { Rules.decide(&$0, inspectionId: returned.id, findingKey: key, decision: decision) }
+    }
+
+    /// Who checked the photos, for the report header.
+    static func providerLabel(_ provider: String?) -> String {
+        switch provider {
+        case "on-device": "the on-device damage model"
+        case "watsonx": "IBM watsonx.ai"
+        case "mock": "the sample answers"
+        case let other?: "AI (\(other))"
+        case nil: "AI"
+        }
     }
 }

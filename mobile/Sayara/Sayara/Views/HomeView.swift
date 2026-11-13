@@ -18,7 +18,14 @@ struct HomeView: View {
 
         Screen {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Hi \(name)").font(.largeTitle.bold()).foregroundStyle(Theme.text)
+                HStack(spacing: 12) {
+                    Image("SayaraLogo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 40, height: 40)
+                        .accessibilityLabel("Sayara")
+                    Text("Hi \(name)").font(.largeTitle.bold()).foregroundStyle(Theme.text)
+                }
                 Text("Cars you track, and cars that suit where you're headed.")
                     .font(.subheadline).foregroundStyle(Theme.textSoft)
             }

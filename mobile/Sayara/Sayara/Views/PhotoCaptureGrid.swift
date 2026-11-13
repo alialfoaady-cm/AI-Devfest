@@ -51,7 +51,8 @@ struct PhotoCaptureGrid: View {
         let badge = badge(slot, hasPhoto: name != nil, dark: dark)
         return ZStack(alignment: .bottomLeading) {
             if name != nil {
-                StoredPhoto(name: name)
+                // In an overlay so a wide photo fills the tile instead of widening it.
+                Color.clear.overlay { StoredPhoto(name: name) }.clipped()
             } else {
                 ZStack {
                     Theme.surfaceRaised

@@ -148,7 +148,7 @@ struct Inspection: Codable, Identifiable, Equatable {
     var photos: [Slot: String]
     /// Return phase only. A missing slot means the answer could not be trusted: show "unsure".
     var aiResult: [Slot: InspectionResult]?
-    /// Which service produced aiResult: "mock" or "server".
+    /// Which service produced aiResult: "mock" (on the phone or on the server) or "watsonx".
     var aiProvider: String?
     /// Keyed "slot:index" of a finding in aiResult[slot].newDamage.
     var ownerDecision: [String: OwnerDecision]
