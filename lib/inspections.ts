@@ -57,3 +57,9 @@ export function lockerCode(bookingId: string): string {
   for (const char of bookingId) hash = (hash * 31 + char.charCodeAt(0)) % 10000;
   return String(hash).padStart(4, "0");
 }
+
+/** Where a booking is in the demo flow, which decides the next thing its borrower does. */
+export function tripStage(state: State, bookingId: string): "pickup" | "driving" | "returned" {
+  if (state.bookings.find((b) => b.id === bookingId)?.status === "returned") return "returned";
+  return findInspection(state, bookingId, "pickup") ? "driving" : "pickup";
+}
