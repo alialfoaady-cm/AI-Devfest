@@ -3,7 +3,7 @@
 import { Camera } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { CarPhoto, Notice, Segment, btnPrimary, btnQuiet, field, pageTitle, searchBar, segmentControl } from "@/components/ui";
+import { CarPhoto, carPhoto, Notice, Segment, btnPrimary, btnQuiet, field, pageTitle, searchBar, segmentControl } from "@/components/ui";
 import { AIRPORTS } from "@/lib/config";
 import { isoDay } from "@/lib/format";
 import { fileToPhoto } from "@/lib/inspection/images";
@@ -94,7 +94,7 @@ export default function ListCarPage() {
       </div>
 
       <div className="max-lg:order-first">
-        <CarPhoto photo={photo} model={car.model || "Your car"} className="aspect-[16/10] w-full rounded-xl" />
+        <CarPhoto photo={photo} model={car.model || "Your car"} className={carPhoto} />
         <label className={`${btnQuiet} mt-3 w-full cursor-pointer has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink`}>
           <Camera size={20} aria-hidden />
           {photo ? "Change photo" : "Add a photo of your car"}

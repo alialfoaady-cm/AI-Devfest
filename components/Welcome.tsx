@@ -30,9 +30,9 @@ export function Welcome() {
 
   return (
     <>
-      <section className="mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-16 lg:py-16">
+      <section className="mx-auto grid max-w-7xl gap-10 px-4 py-10 [--enter-d:800ms] sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-16 lg:px-16 lg:py-16">
         <div>
-          <h1 style={step(0)} className="enter text-balance text-4xl font-bold leading-[1.1] tracking-tight sm:text-5xl lg:text-[3.25rem]">
+          <h1 style={step(0)} className="enter text-balance text-4xl font-bold leading-[1.1] tracking-[-0.03em] sm:text-5xl lg:text-[3.25rem]">
             Lend your car at the airport. Borrow one where you land.
           </h1>
           <p style={step(1)} className="enter mt-4 max-w-md text-lg text-ink-soft">
@@ -90,7 +90,7 @@ export function Welcome() {
         <AirportMap style={step(3)} className="enter" />
       </section>
 
-      <section aria-labelledby="how-heading" className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
+      <section aria-labelledby="how-heading" className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-16">
         <h2 id="how-heading" className="text-3xl font-bold tracking-tight sm:text-4xl">
           How Sayara works
         </h2>

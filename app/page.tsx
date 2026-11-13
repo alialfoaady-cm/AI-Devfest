@@ -4,7 +4,7 @@ import { CarProfile } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { CarPhoto, Empty, Initial, Notice, Segment, btnPrimary, btnStrong, card, pageTitle, searchBar, segmentControl } from "@/components/ui";
+import { CarPhoto, Empty, Notice, Segment, btnPrimary, btnStrong, carGrid, carPhoto, cardTitle, pageTitle, searchBar, segmentControl } from "@/components/ui";
 import { AIRPORTS } from "@/lib/config";
 import { isoDay, plural, shortDate } from "@/lib/format";
 import { availableCars, tripDays } from "@/lib/rules";
@@ -81,25 +81,21 @@ export default function FindPage() {
         )}
       </div>
 
-      <ul className="mt-2 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className={`${carGrid} mt-4`}>
         {cars.map((car) => {
           const owner = state.users.find((u) => u.id === car.ownerId)?.name.split(" ")[0] ?? "Owner";
           return (
-            <li key={car.id} className={`${card} lift flex flex-col overflow-hidden`}>
-              <CarPhoto photo={car.photo} model={car.model} className="aspect-[16/10] w-full" />
-              <div className="flex flex-1 flex-col p-4">
-                <h2 className="text-lg font-bold leading-tight tracking-tight">{car.model}</h2>
-                <p className="mt-1 text-ink-soft">
-                  {plural(car.seats, "seat")}. Back by {shortDate(car.to)}.
+            <li key={car.id} className="flex flex-col">
+              <CarPhoto photo={car.photo} model={car.model} className={carPhoto} />
+              <div className="flex flex-1 flex-col px-2 pt-2">
+                <h2 className={cardTitle}>{car.model}</h2>
+                <p className="text-sm text-ink-soft">
+                  {plural(car.seats, "seat")}. Lent by {owner}, back by {shortDate(car.to)}.
                 </p>
-                <p className="mt-3 flex items-center gap-2 text-sm">
-                  <Initial name={owner} />
-                  Lent by {owner}
-                </p>
-                <div className="mt-4 flex items-center justify-between gap-3 border-t border-line pt-4">
-                  <p className="leading-tight">
-                    <span className="text-lg font-bold tabular-nums">{plural(days, "credit")}</span>
-                    <span className="block text-sm text-ink-soft">for {plural(days, "day")}</span>
+                <div className="mt-auto flex items-center justify-between gap-3 pt-3">
+                  <p>
+                    <span className="font-bold tabular-nums">{plural(days, "credit")}</span>{" "}
+                    <span className="text-sm text-ink-soft">for {plural(days, "day")}</span>
                   </p>
                   <button type="button" className={btnPrimary} disabled={!canAfford || busy} onClick={() => bookCar(car.id)}>
                     Book

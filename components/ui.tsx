@@ -14,10 +14,15 @@ export const btnStrong = `${button} bg-ink text-canvas hover:opacity-85`;
 export const btnQuiet = `${button} bg-surface text-ink hover:bg-surface-2`;
 
 export const card = "rounded-xl border border-line bg-canvas";
-export const pageTitle = "text-balance text-3xl font-bold leading-[1.15] tracking-tight sm:text-4xl";
+export const pageTitle = "text-balance text-[2rem] font-extrabold leading-[1.16] tracking-[-0.024em] sm:text-[2.375rem]";
+/** A car's name on a card: 21/28, heaviest weight. Weight, not size, sets it apart from the grey line under it. */
+export const cardTitle = "text-[1.3125rem] font-extrabold leading-7 tracking-[-0.014em]";
+/** A car on a grid: a 3:2 photo and a few lines under it, with no box around them. */
+export const carGrid = "grid gap-x-4 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+export const carPhoto = "aspect-[3/2] w-full rounded-xl";
 export const heading = "text-xl font-bold leading-tight tracking-tight sm:text-2xl";
 export const field =
-  "mt-1.5 block h-12 w-full rounded-lg bg-surface px-3.5 text-ink placeholder:text-ink-soft focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink";
+  "mt-1.5 block h-14 w-full rounded-lg bg-surface px-4 text-ink placeholder:text-ink-soft focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink";
 
 const TONES = {
   green: "bg-green text-on-green",
@@ -86,10 +91,10 @@ export const searchBar =
 
 export function Segment({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <label className="block px-4 py-2.5 transition-colors duration-150 focus-within:bg-surface focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-ink hover:bg-surface">
-      <span className="block text-sm font-semibold">{label}</span>
+    <label className="block px-4 py-2 transition-colors duration-150 focus-within:bg-surface focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-ink hover:bg-surface">
+      <span className="block text-xs font-medium leading-4 text-ink-soft">{label}</span>
       {children}
     </label>
   );
 }
-export const segmentControl = "block h-7 w-full bg-transparent text-ink-soft outline-none";
+export const segmentControl = "block h-6 w-full bg-transparent text-ink outline-none";

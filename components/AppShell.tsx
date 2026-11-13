@@ -32,7 +32,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </a>
 
       <header className="sticky top-0 z-30 bg-black text-white">
-        <div className="mx-auto flex h-16 max-w-6xl items-center gap-8 px-4 sm:px-6">
+        <div className="mx-auto flex h-16 max-w-7xl items-center gap-8 px-4 sm:px-6 lg:px-16">
           <Link href="/" className="flex h-11 items-center text-2xl font-bold tracking-tight focus-visible:outline-white">
             Sayara
           </Link>
@@ -96,7 +96,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {ready &&
           (me ? (
             // A short fade when the section changes, so the new screen does not snap in.
-            <div key={pathname} className="enter mx-auto w-full max-w-6xl px-4 pt-8 sm:px-6 sm:pt-10">
+            <div key={pathname} className="enter mx-auto w-full max-w-7xl px-4 pt-8 sm:px-6 sm:pt-10 lg:px-16">
               {children}
             </div>
           ) : (

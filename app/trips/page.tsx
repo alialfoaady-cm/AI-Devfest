@@ -2,7 +2,7 @@
 
 import { Path } from "@phosphor-icons/react";
 import Link from "next/link";
-import { CarPhoto, Empty, Pill, btnPrimary, btnQuiet, card, pageTitle } from "@/components/ui";
+import { CarPhoto, Empty, Pill, btnPrimary, btnQuiet, carGrid, carPhoto, cardTitle, pageTitle } from "@/components/ui";
 import { plural, shortDate } from "@/lib/format";
 import { tripStage } from "@/lib/inspections";
 import { useStore } from "@/lib/store";
@@ -38,19 +38,19 @@ export default function TripsPage() {
           </Empty>
         </div>
       ) : (
-        <ul className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className={`${carGrid} mt-6`}>
           {trips.map((trip) => {
             const car = state.cars.find((c) => c.id === trip.carId);
             const stage = STAGE[tripStage(state, trip.id)];
             return (
-              <li key={trip.id} className={`${card} lift flex flex-col overflow-hidden`}>
-                <CarPhoto photo={car?.photo} model={car?.model ?? "Car"} className="aspect-[16/10] w-full" />
-                <div className="flex flex-1 flex-col items-start p-4">
+              <li key={trip.id} className="flex flex-col">
+                <CarPhoto photo={car?.photo} model={car?.model ?? "Car"} className={carPhoto} />
+                <div className="flex flex-1 flex-col items-start px-2 pt-3">
                   <Pill tone={stage.tone}>{stage.pill}</Pill>
-                  <h2 className="mt-2.5 text-lg font-bold leading-tight tracking-tight">
+                  <h2 className={`${cardTitle} mt-2`}>
                     {car?.model} at {car?.airport}
                   </h2>
-                  <p className="mt-1 text-ink-soft">
+                  <p className="text-sm text-ink-soft">
                     {shortDate(trip.from)} to {shortDate(trip.to)}, {plural(trip.days, "credit")}
                   </p>
                   <Link href={`/trips/${trip.id}`} className={`${stage.tone === "quiet" ? btnQuiet : btnPrimary} mt-4 w-full`}>

@@ -97,29 +97,17 @@ summary {
 }
 
 /* Content that replaces what was on screen arrives once, as a block. Set --i on siblings
-   for a short stagger (the key code digits, the welcome screen's three parts). */
+   for a short stagger (the key code digits, the welcome screen's three parts). The welcome
+   screen, seen once, sets --enter-d to take its time; everywhere else stays quick. */
 .enter {
   transition:
-    opacity 320ms var(--ease-out),
-    translate 320ms var(--ease-out);
+    opacity var(--enter-d, 320ms) var(--ease-out),
+    translate var(--enter-d, 320ms) var(--ease-out);
   transition-delay: calc(var(--i, 0) * 70ms);
 
   @starting-style {
     opacity: 0;
     translate: 0 10px;
-  }
-}
-
-/* A card you can pick rises a little under a real pointer (touch screens fire false hovers). */
-.lift {
-  transition:
-    translate 260ms var(--ease-out),
-    border-color 160ms ease;
-}
-@media (hover: hover) and (pointer: fine) {
-  .lift:hover {
-    translate: 0 -4px;
-    border-color: var(--ink-soft);
   }
 }
 
