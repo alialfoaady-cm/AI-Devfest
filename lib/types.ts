@@ -65,6 +65,8 @@ export type Inspection = {
   photos: Photos;
   /** Return phase only. null for a slot = the model's answer could not be trusted: show "unsure". */
   aiResult: Record<Slot, InspectionResult | null> | null;
+  /** Which adapter produced aiResult: "mock" or "watsonx". Shown on the report. */
+  aiProvider?: string;
   /** Keyed "slot:index" of a finding in aiResult[slot].new_damage. */
   ownerDecision: Record<string, OwnerDecision>;
 };

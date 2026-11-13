@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#c9ced6"/><rect y="440" width="800" height="160" fill="#8b929e"/>
+  <rect x="40" y="520" width="14" height="80" fill="#ffc914"/><rect x="746" y="520" width="14" height="80" fill="#ffc914"/>
+  
+  <path d="M220 420 L220 300 L275 190 L525 190 L580 300 L580 420 Z" fill="#2f6fd0"/>
+  <path d="M290 205 L510 205 L548 290 L252 290 Z" fill="#b9d4ee"/>
+  <rect x="235" y="315" width="70" height="34" rx="8" fill="#ffe9a3"/><rect x="495" y="315" width="70" height="34" rx="8" fill="#ffe9a3"/>
+  <rect x="340" y="360" width="120" height="34" rx="4" fill="#f4f5f7"/><text x="400" y="384" font-family="sans-serif" font-size="20" text-anchor="middle" fill="#1c2433">DEMO</text>
+  <rect x="210" y="405" width="380" height="30" rx="8" fill="#1c2433"/>
+  <rect x="235" y="430" width="50" height="50" rx="8" fill="#1c2433"/><rect x="515" y="430" width="50" height="50" rx="8" fill="#1c2433"/>
+  <text x="24" y="40" font-family="sans-serif" font-size="22" fill="#1c2433">Sample photo: return, front</text></svg>
