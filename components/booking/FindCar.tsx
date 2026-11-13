@@ -69,7 +69,7 @@ export function FindCar() {
 
       <p className="mt-3 text-ink-soft" aria-live="polite">
         {validTrip
-          ? `${plural(days, "day")} costs ${plural(days, "credit")}. ${plural(cars.length, "car")} free at ${search.airport}.`
+          ? `A ${days}-day trip costs ${plural(days, "credit")}. ${plural(cars.length, "car")} free at ${search.airport}.`
           : "Pick a return date at least one day after pickup."}
       </p>
 
