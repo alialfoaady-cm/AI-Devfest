@@ -49,15 +49,30 @@ export const MAX_IMAGE_EDGE_PX = 1120;
  */
 export const STORED_PHOTO_EDGE_PX = 720;
 
-/** Where the map opens before an owner has dropped a pin: the parking garage Google Maps lists
- * for the McNamara terminal (DTW) and for Terminal 1 (YYZ), looked up on 2026-11-13. */
+/** Where the map opens before an owner has dropped a pin: each airport's main terminal garage.
+ * Looked up on 2026-11-13 (airport parking pages and OpenStreetMap); YYZ is Terminal 1's garage. */
 export const AIRPORT_PARKING: Record<string, { lat: number; lng: number }> = {
-  DTW: { lat: 42.2068, lng: -83.3555 },
+  DTW: { lat: 42.2068, lng: -83.3555 }, // McNamara Garage
+  ORD: { lat: 41.9783, lng: -87.9034 }, // Main Garage, Terminals 1-3
+  ATL: { lat: 33.6391, lng: -84.4481 }, // South Parking Deck, Domestic Terminal (approximate)
+  DEN: { lat: 39.8489, lng: -104.6765 }, // West Garage
+  LAX: { lat: 33.9443, lng: -118.4072 }, // Parking Structure 3
+  MCO: { lat: 28.4333, lng: -81.3083 }, // Parking Garage A
+  SEA: { lat: 47.4433, lng: -122.2992 }, // SEA Airport Parking Garage
+  JFK: { lat: 40.6456, lng: -73.7813 }, // Terminal 4 Blue Garage
   YYZ: { lat: 43.6831, lng: -79.6135 },
 };
 
+/** Every airport with cars. The demo listings in lib/seed/listings.json use the US ones. */
 export const AIRPORTS: Record<string, string> = {
   DTW: "Detroit Metro",
+  ORD: "Chicago O'Hare",
+  ATL: "Atlanta Hartsfield-Jackson",
+  DEN: "Denver International",
+  LAX: "Los Angeles International",
+  MCO: "Orlando International",
+  SEA: "Seattle-Tacoma",
+  JFK: "New York JFK",
   YYZ: "Toronto Pearson",
 };
 
