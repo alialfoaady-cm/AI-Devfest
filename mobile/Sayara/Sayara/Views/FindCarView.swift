@@ -11,6 +11,7 @@ struct FindCarView: View {
     @State private var to = SampleData.defaultTo
     @State private var error: String?
     @State private var pending: Car?
+    @State private var shown: String?   // id of the car in the middle of the carousel
 
     private var days: Int { Rules.tripDays(from, to) }
     private var credits: Int { store.currentUser?.credits ?? 0 }
@@ -32,7 +33,7 @@ struct FindCarView: View {
             summary
 
             if let error { ErrorBanner(message: error) }
-            ForEach(results) { car in carCard(car) }
+            if !results.isEmpty { carousel }
 
             if days >= 1 && results.isEmpty {
                 EmptyState(symbol: "car.side",
@@ -64,6 +65,42 @@ struct FindCarView: View {
             Text("Pick a return date at least one day after pickup.")
                 .font(.subheadline).foregroundStyle(Theme.flag)
         }
+    }
+
+    /// The cars side by side: swipe sideways, one card at a time, with the next one peeking in.
+    private var carousel: some View {
+        VStack(spacing: 10) {
+            ScrollView(.horizontal) {
+                LazyHStack(alignment: .top, spacing: 14) {
+                    ForEach(results) { car in
+                        carCard(car)
+                            .containerRelativeFrame(.horizontal) { width, _ in results.count == 1 ? width : width * 0.86 }
+                            .id(car.id)
+                    }
+                }
+                .scrollTargetLayout()
+            }
+            .scrollTargetBehavior(.viewAligned)
+            .scrollPosition(id: $shown)
+            .scrollIndicators(.hidden)
+            .contentMargins(.horizontal, 16, for: .scrollContent)
+            .padding(.horizontal, -16)   // run edge to edge, past the page margin
+
+            if results.count > 1 {
+                let index = results.firstIndex { $0.id == shown } ?? 0
+                HStack(spacing: 6) {
+                    ForEach(results.indices, id: \.self) { i in
+                        Capsule()
+                            .fill(i == index ? Theme.green : Theme.line)
+                            .frame(width: i == index ? 18 : 7, height: 7)
+                    }
+                }
+                .animation(.easeOut(duration: 0.2), value: index)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Car \(index + 1) of \(results.count)")
+            }
+        }
+        .onChange(of: results.map(\.id)) { shown = results.first?.id }
     }
 
     /// Turo-style card: big 3:2 photo, heavy name, one line of facts, price and Book.

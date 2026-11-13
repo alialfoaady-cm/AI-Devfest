@@ -119,6 +119,8 @@ struct CarPhotoView: View {
         ZStack {
             if let preview {
                 Image(uiImage: preview).resizable().scaledToFill()
+            } else if let asset = car.flatMap({ Self.assetName($0.photo) }) {
+                Showroom(asset: asset)
             } else if let spec = car?.photo, SampleCarPortrait.isSample(spec) {
                 SampleCarPortrait(spec: spec)
             } else if let name = car?.photo, let image = PhotoStore.load(name) {
@@ -134,6 +136,36 @@ struct CarPhotoView: View {
             }
         }
         .clipped()
+    }
+
+    /// "/cars/toyota-rav4.png" (the web app's path) -> "toyota-rav4", the image in Assets.xcassets/Cars.
+    static func assetName(_ photo: String?) -> String? {
+        guard let photo, photo.hasPrefix("/cars/") else { return nil }
+        let name = String(photo.dropFirst("/cars/".count).split(separator: ".").first ?? "")
+        return UIImage(named: name) == nil ? nil : name
+    }
+}
+
+/// A cut-out car photo centred on a dark showroom floor, like the web app's demo cars.
+private struct Showroom: View {
+    let asset: String
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack {
+                LinearGradient(colors: [Color(hex: 0x2A2F36), Color(hex: 0x15181C)], startPoint: .top, endPoint: .bottom)
+                Ellipse()
+                    .fill(.black.opacity(0.55))
+                    .frame(width: geo.size.width * 0.72, height: geo.size.height * 0.09)
+                    .blur(radius: 6)
+                    .offset(y: geo.size.height * 0.27)
+                Image(asset)
+                    .resizable()
+                    .scaledToFit()
+                    .padding(.horizontal, geo.size.width * 0.07)
+                    .padding(.vertical, geo.size.height * 0.08)
+            }
+        }
     }
 }
 

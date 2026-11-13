@@ -67,7 +67,8 @@ struct AccountMenu: ToolbarContent {
         ToolbarItem(placement: .topBarTrailing) {
             Menu {
                 Section("Signed in as") {
-                    ForEach(store.state.users) { user in
+                    // The web app's demo-listing owners have no accounts, so they are not in the switcher.
+                    ForEach(store.state.users.filter { !$0.id.hasPrefix("seed-") }) { user in
                         Button {
                             store.currentUserId = user.id
                         } label: {
