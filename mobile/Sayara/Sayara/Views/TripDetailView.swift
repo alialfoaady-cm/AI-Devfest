@@ -10,6 +10,8 @@ struct TripDetailView: View {
     @State private var returnPhotos: [Slot: String] = [:]
     @State private var status: [Slot: SlotStatus]?
     @State private var error: String?
+    @State private var cancelling = false
+    @State private var addingCover = false
 
     var body: some View {
         let state = store.state
@@ -34,24 +36,50 @@ struct TripDetailView: View {
                     WhereItIs(car: car, owner: owner, returning: true)
                     returnStep(pickup)
                 }
-                if isOwner && stage != .returned {
+                if isOwner && (stage == .pickup || stage == .driving) {
                     Card {
                         Text((stage == .pickup
                               ? "\(borrower) has booked your car and has not picked it up yet."
                               : "\(borrower) has your car. The pickup photos are saved.")
-                             + " You earn \(plural(booking.days, "credit")) when it comes back.")
+                             + " You earn \(plural(Rules.tripCost(booking.days), "credit")) when it comes back, plus 1 for each extra mile.")
                             .foregroundStyle(Theme.text)
                     }
                 }
                 if stage == .returned && (isBorrower || isOwner),
                    let pickup = state.inspection(bookingId, .pickup), let returned = state.inspection(bookingId, .return) {
-                    (Text("Car returned. ")
-                     + Text(isOwner ? "You earned \(plural(booking.days, "credit"))." : "\(owner) earned \(plural(booking.days, "credit")).")
-                        .foregroundStyle(Theme.greenText))
-                        .font(.title2.bold())
-                        .foregroundStyle(Theme.text)
+                    VStack(alignment: .leading, spacing: 8) {
+                        (Text("Car returned. ")
+                         + Text("\(isOwner ? "You" : owner) earned \(plural(Rules.tripCost(booking.days) + (booking.mileage?.credits ?? 0), "credit")).")
+                            .foregroundStyle(Theme.greenText))
+                            .font(.title2.bold())
+                            .foregroundStyle(Theme.text)
+                        Text(mileageText(booking, isBorrower: isBorrower, isOwner: isOwner, owner: owner, borrower: borrower))
+                            .font(.subheadline).foregroundStyle(Theme.textSoft)
+                    }
                     ImpactView(days: booking.days)
-                    CompareReportView(pickup: pickup, returned: returned, canDecide: isOwner)
+                    CompareReportView(pickup: pickup, returned: returned, canDecide: isOwner,
+                                      borrowerName: borrower, insured: booking.insurance != nil)
+                }
+                // Either person can cancel until the car is picked up. What it costs shows only in that window.
+                if (isBorrower || isOwner) && stage == .pickup {
+                    Button("Cancel this trip") { cancelling = true }
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(Theme.textSoft)
+                        .underline()
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 4)
+                        .sheet(isPresented: $cancelling) {
+                            CancelTripSheet(booking: booking, otherName: isBorrower ? owner : borrower)
+                        }
+                }
+                if let cancelled = booking.cancelled, isBorrower || isOwner {
+                    let by = cancelled.by == store.currentUserId ? "You" : state.firstName(cancelled.by)
+                    let parkingTo = cancelled.by == booking.userId ? (isOwner ? "you" : owner) : (isBorrower ? "you" : borrower)
+                    Card {
+                        Text("\(by) cancelled this trip.").font(.title3.bold()).foregroundStyle(Theme.text)
+                        Text("\(by) paid \(payText(cancelled.fee)) to cancel. \(plural(cancelled.parkingCredits, "credit")) of it went to \(parkingTo) for parking, and the rest to Sayara. \(isBorrower ? "You" : borrower) got back the \(payText(cancelled.refund)) paid for the trip.")
+                            .foregroundStyle(Theme.textSoft)
+                    }
                 }
                 if !isBorrower && !isOwner {
                     Card { Text("This trip belongs to other users. Switch user at the top to see it.").foregroundStyle(Theme.textSoft) }
@@ -71,25 +99,58 @@ struct TripDetailView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 8))
             VStack(alignment: .leading, spacing: 6) {
                 Text("\(car.model) at \(car.airport)").font(.title3.weight(.heavy)).foregroundStyle(Theme.text)
-                Text("\(Day.short(booking.from)) to \(Day.short(booking.to)). \(isOwner ? "Borrowed by \(borrower)." : "Lent by \(owner).")")
+                Text("\(Day.short(booking.from)) to \(Day.short(booking.to)). \(isOwner ? "Borrowed by \(borrower)." : "Lent by \(owner).") \(booking.days * Config.milesIncludedPerDay) miles included.")
                     .font(.subheadline).foregroundStyle(Theme.textSoft)
+                HStack(spacing: 10) {
+                    Pill(text: booking.insurance != nil ? "Insured: Sayara pays for damage" : "Not insured",
+                         color: booking.insurance != nil ? Theme.greenText : Theme.textSoft,
+                         symbol: booking.insurance != nil ? "checkmark.shield.fill" : "shield.slash")
+                    if booking.insurance == nil && !isOwner && stage == .pickup {
+                        Button("Add cover") { addingCover = true }
+                            .font(.caption.weight(.semibold)).underline()
+                            .foregroundStyle(Theme.text)
+                            .sheet(isPresented: $addingCover) {
+                                NavigationStack {
+                                    Screen { CoverCard(booking: booking) }
+                                        .navigationTitle("Add cover before pickup")
+                                        .navigationBarTitleDisplayMode(.inline)
+                                        .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { addingCover = false } } }
+                                }
+                                .preferredColorScheme(.dark)
+                                .tint(Theme.green)
+                            }
+                    }
+                }
                 progress(stage)
             }
         }
     }
 
+    /// What the dashboard photos said about miles, and what the extra ones cost.
+    private func mileageText(_ booking: Booking, isBorrower: Bool, isOwner: Bool, owner: String, borrower: String) -> String {
+        guard let m = booking.mileage else {
+            return "The odometer could not be read from the dashboard photos, so there is no charge for miles."
+        }
+        if m.extraMiles == 0 { return "\(m.miles) miles driven, inside the \(m.included) included." }
+        let cost = m.credits == 0
+            ? "were too few to cost a credit."
+            : "cost \(isBorrower ? "you" : borrower) \(plural(m.credits, "credit")), paid to \(isOwner ? "you" : owner)."
+        return "\(m.miles) miles driven, \(m.included) included. The \(m.extraMiles) extra \(cost)"
+    }
+
     /// Pick up, Drive, Return: three bars, filled up to where the trip is.
     private func progress(_ stage: TripStage) -> some View {
         let steps = ["Pick up", "Drive", "Return"]
+        let step = stage == .cancelled ? -1 : stage.rawValue
         return HStack(spacing: 6) {
             ForEach(Array(steps.enumerated()), id: \.offset) { index, label in
                 VStack(alignment: .leading, spacing: 4) {
-                    Capsule().fill(index <= stage.rawValue ? Theme.text : Theme.line).frame(height: 4)
+                    Capsule().fill(index <= step ? Theme.green : Theme.line).frame(height: 4)
                     Text(label).font(.caption.weight(.medium))
-                        .foregroundStyle(index == stage.rawValue ? Theme.text : Theme.textSoft)
+                        .foregroundStyle(index == step ? Theme.text : Theme.textSoft)
                 }
                 .accessibilityElement(children: .combine)
-                .accessibilityValue(index < stage.rawValue ? "done" : index == stage.rawValue ? "now" : "later")
+                .accessibilityValue(index < step ? "done" : index == step ? "now" : "later")
             }
         }
         .padding(.top, 4)

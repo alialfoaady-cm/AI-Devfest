@@ -134,3 +134,17 @@ struct Screen<Content: View>: View {
 func plural(_ count: Int, _ word: String) -> String {
     "\(count) \(word)\(count == 1 ? "" : "s")"
 }
+
+/// 367.5 -> "$367.50"
+func usd(_ amount: Double) -> String { String(format: "$%.2f", amount) }
+
+/// "245 credits", "$367.50", or "100 credits + $217.50". Same as payText in lib/format.ts.
+func payText(_ paid: Payment) -> String {
+    [paid.credits > 0 || paid.usd == 0 ? plural(paid.credits, "credit") : "", paid.usd > 0 ? usd(paid.usd) : ""]
+        .filter { !$0.isEmpty }.joined(separator: " + ")
+}
+
+/// "245 credits or $367.50"
+func priceText(_ credits: Int) -> String {
+    "\(plural(credits, "credit")) or \(usd(Double(credits) * Config.usdPerCredit))"
+}

@@ -32,7 +32,7 @@ enum Day {
 }
 
 enum Rules {
-    /// Whole days between two dates. 1 credit = 1 day.
+    /// Whole days between two dates.
     static func tripDays(_ from: String, _ to: String) -> Int {
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")
@@ -40,6 +40,26 @@ enum Rules {
         f.dateFormat = "yyyy-MM-dd"
         guard let a = f.date(from: from), let b = f.date(from: to) else { return 0 }
         return Int((b.timeIntervalSince(a) / 86_400).rounded())
+    }
+
+    /// What a trip costs to book: 35 credits a day, which is the 35 miles a day it includes at 1 credit a mile.
+    static func tripCost(_ days: Int) -> Int { days * Config.creditsPerDay }
+
+    /// What cover for a trip costs: 10 credits a day.
+    static func insuranceCost(_ days: Int) -> Int { days * Config.insuranceCreditsPerDay }
+
+    /// A price paid with some credits and the rest in dollars, at $1.50 a credit.
+    /// shortcut: there is no payment provider, so the dollar part is recorded, not charged.
+    static func splitPayment(_ cost: Int, creditsUsed: Int) throws -> Payment {
+        guard (0...cost).contains(creditsUsed) else {
+            throw RuleError("Choose how many credits to use, from 0 to \(cost).")
+        }
+        return Payment(credits: creditsUsed, usd: Double(cost - creditsUsed) * Config.usdPerCredit)
+    }
+
+    /// How many credits go towards a price: as many as the person has, up to the price, or none.
+    static func creditsToUse(_ cost: Int, balance: Int, useCredits: Bool) -> Int {
+        useCredits ? min(max(balance, 0), cost) : 0
     }
 
     /// Back-to-back is not an overlap: one trip may end the day the next begins.
@@ -51,8 +71,9 @@ enum Rules {
         car.from <= from && to <= car.to
     }
 
+    /// A cancelled trip frees the car's dates.
     static func hasOverlap(_ state: AppState, _ carId: String, _ from: String, _ to: String) -> Bool {
-        state.bookings.contains { $0.carId == carId && overlaps($0.from, $0.to, from, to) }
+        state.bookings.contains { $0.carId == carId && $0.status != .cancelled && overlaps($0.from, $0.to, from, to) }
     }
 
     static func availableCars(_ state: AppState, airport: String, from: String, to: String, userId: String) -> [Car] {
@@ -65,8 +86,10 @@ enum Rules {
         }
     }
 
+    /// `creditsUsed` is how much of the price comes from credits; the rest is paid in dollars. Left out, it is all credits.
     @discardableResult
-    static func book(_ state: inout AppState, userId: String, carId: String, from: String, to: String) throws -> Booking {
+    static func book(_ state: inout AppState, userId: String, carId: String, from: String, to: String,
+                     creditsUsed: Int? = nil) throws -> Booking {
         let days = tripDays(from, to)
         guard days >= 1 else { throw RuleError("A trip must be at least 1 day.") }
         guard let userIndex = state.users.firstIndex(where: { $0.id == userId }),
@@ -78,31 +101,115 @@ enum Rules {
         guard !hasOverlap(state, carId, from, to) else {
             throw RuleError("Those dates overlap another booking on this car.")
         }
+        let cost = tripCost(days)
+        let paid = try splitPayment(cost, creditsUsed: creditsUsed ?? cost)
         let credits = state.users[userIndex].credits
-        guard credits >= days else {
-            throw RuleError("This trip costs \(days) credits and you have \(credits).")
+        guard credits >= paid.credits else {
+            throw RuleError("This trip costs \(cost) credits and you have \(credits). Pay the rest in dollars.")
         }
 
-        state.users[userIndex].credits -= days
+        state.users[userIndex].credits -= paid.credits
         let booking = Booking(id: "b\(state.bookings.count + 1)", carId: carId, userId: userId,
-                              from: from, to: to, days: days, status: .booked)
+                              from: from, to: to, days: days, status: .booked, paid: paid)
         state.bookings.append(booking)
         return booking
     }
 
-    /// Marks the booking returned and pays the owner. The owner earns credits on return, not on booking.
-    static func returnCar(_ state: inout AppState, bookingId: String) throws {
+    /// Cover for one trip, bought by its borrower before pickup. It moves nothing later: it only
+    /// records that Sayara, not the borrower, pays for damage the owner confirms.
+    static func insureTrip(_ state: inout AppState, userId: String, bookingId: String, creditsUsed: Int? = nil) throws {
+        guard let index = state.bookings.firstIndex(where: { $0.id == bookingId && $0.userId == userId }),
+              let userIndex = state.users.firstIndex(where: { $0.id == userId }) else {
+            throw RuleError("That trip is not yours.")
+        }
+        let booking = state.bookings[index]
+        guard booking.insurance == nil else { throw RuleError("This trip is already covered.") }
+        guard booking.status == .booked, !state.inspections.contains(where: { $0.bookingId == bookingId }) else {
+            throw RuleError("Cover has to be bought before you pick up the car.")
+        }
+        let cost = insuranceCost(booking.days)
+        let paid = try splitPayment(cost, creditsUsed: creditsUsed ?? cost)
+        let credits = state.users[userIndex].credits
+        guard credits >= paid.credits else {
+            throw RuleError("This cover costs \(cost) credits and you have \(credits). Pay the rest in dollars.")
+        }
+        state.users[userIndex].credits -= paid.credits
+        state.bookings[index].insurance = paid
+    }
+
+    /// What cancelling a trip costs, in credits: the other person's airport parking for the trip's
+    /// days, plus Sayara's 15% on top.
+    static func cancellationFee(_ days: Int) -> (parking: Int, cut: Int, total: Int) {
+        let parking = Int((Double(days) * Config.parkingFeePerDayUSDEstimate / Config.usdPerCredit).rounded())
+        let cut = Int((Double(parking) * Config.cancellationCut).rounded())
+        return (parking, cut, parking + cut)
+    }
+
+    /// What the borrower paid for a trip and its cover: all of it comes back if the trip is cancelled.
+    static func refundOf(_ booking: Booking) -> Payment {
+        let trip = booking.paid ?? Payment(credits: tripCost(booking.days), usd: 0)
+        return Payment(credits: trip.credits + (booking.insurance?.credits ?? 0),
+                       usd: trip.usd + (booking.insurance?.usd ?? 0))
+    }
+
+    /// Either person on a trip can cancel it before pickup. The borrower gets their payment back.
+    /// Whoever cancels pays the fee: the parking part goes to the other person, the rest to Sayara.
+    static func cancelBooking(_ state: inout AppState, userId: String, bookingId: String, creditsUsed: Int? = nil) throws {
+        guard let index = state.bookings.firstIndex(where: { $0.id == bookingId }),
+              let ownerId = state.car(state.bookings[index].carId)?.ownerId,
+              state.bookings[index].userId == userId || ownerId == userId else {
+            throw RuleError("That trip is not yours.")
+        }
+        let booking = state.bookings[index]
+        guard booking.status == .booked, !state.inspections.contains(where: { $0.bookingId == bookingId }) else {
+            throw RuleError("A trip can only be cancelled before pickup.")
+        }
+
+        let fee = cancellationFee(booking.days)
+        let paid = try splitPayment(fee.total, creditsUsed: creditsUsed ?? fee.total)
+        let refund = refundOf(booking)
+        let otherId = userId == booking.userId ? ownerId : booking.userId
+        func change(_ id: String) -> Int {
+            (id == booking.userId ? refund.credits : 0) - (id == userId ? paid.credits : 0) + (id == otherId ? fee.parking : 0)
+        }
+        guard let canceller = state.user(userId), canceller.credits + change(userId) >= 0 else {
+            throw RuleError("Cancelling costs \(fee.total) credits and you do not have that many. Pay the rest in dollars.")
+        }
+
+        for i in state.users.indices { state.users[i].credits += change(state.users[i].id) }
+        state.bookings[index].status = .cancelled
+        state.bookings[index].cancelled = Cancellation(by: userId, fee: paid, parkingCredits: fee.parking, refund: refund)
+    }
+
+    /// A trip includes 35 miles a day. Each mile past the total costs a credit. (With another rate
+    /// the charge is rounded to whole credits: nobody pays a fraction.)
+    static func mileageCharge(_ days: Int, kmDriven: Int, creditsPerExtraMile: Double = Double(Config.creditsPerExtraMile)) -> MileageCharge {
+        let miles = Int((Double(kmDriven) / Config.kmPerMile).rounded())
+        let included = days * Config.milesIncludedPerDay
+        let extraMiles = max(0, miles - included)
+        return MileageCharge(miles: miles, included: included, extraMiles: extraMiles,
+                             credits: Int((Double(extraMiles) * creditsPerExtraMile).rounded()))
+    }
+
+    /// The owner is paid what the trip cost to book. With the kilometres driven (read from the two
+    /// dashboard photos), any extra miles are paid too, by the borrower, who can go below zero.
+    static func returnCar(_ state: inout AppState, bookingId: String, kmDriven: Int? = nil) throws {
         guard let index = state.bookings.firstIndex(where: { $0.id == bookingId }) else {
             throw RuleError("That booking does not exist.")
         }
         let booking = state.bookings[index]
         guard booking.status != .returned else { throw RuleError("This car has already been returned.") }
+        guard booking.status != .cancelled else { throw RuleError("This trip was cancelled.") }
 
-        if let ownerId = state.car(booking.carId)?.ownerId,
-           let ownerIndex = state.users.firstIndex(where: { $0.id == ownerId }) {
-            state.users[ownerIndex].credits += booking.days
+        let ownerId = state.car(booking.carId)?.ownerId
+        let mileage = kmDriven.map { mileageCharge(booking.days, kmDriven: $0) }
+        let extra = mileage?.credits ?? 0
+        for i in state.users.indices {
+            if state.users[i].id == ownerId { state.users[i].credits += tripCost(booking.days) + extra }
+            else if state.users[i].id == booking.userId { state.users[i].credits -= extra }
         }
         state.bookings[index].status = .returned
+        state.bookings[index].mileage = mileage
     }
 
     // MARK: Lending and photo check
@@ -135,16 +242,18 @@ enum Rules {
 
     static func savePickup(_ state: inout AppState, bookingId: String, photos: [Slot: String]) throws {
         guard state.inspection(bookingId, .pickup) == nil else { throw RuleError("Pickup photos are already saved.") }
+        guard state.booking(bookingId)?.status != .cancelled else { throw RuleError("This trip was cancelled.") }
         guard photos.count == Slot.allCases.count else { throw RuleError("Take all six photos first.") }
         state.inspections.append(Inspection(id: "\(bookingId)-pickup", bookingId: bookingId, phase: .pickup,
                                             photos: photos, aiResult: nil, aiProvider: nil, ownerDecision: [:]))
     }
 
-    /// Saves the return photos with the AI's flags, then returns the car, which pays the owner.
+    /// Saves the return photos with the AI's flags, then returns the car, which pays the owner:
+    /// the days, plus any miles past the allowance, measured from the two dashboard readings.
     static func saveReturn(_ state: inout AppState, bookingId: String, photos: [Slot: String],
                            results: [Slot: InspectionResult], provider: String) throws {
         guard state.inspection(bookingId, .pickup) != nil else { throw RuleError("Take the pickup photos first.") }
-        try returnCar(&state, bookingId: bookingId)
+        try returnCar(&state, bookingId: bookingId, kmDriven: Verdict.kmDriven(results[.dashboard]))
         state.inspections.append(Inspection(id: "\(bookingId)-return", bookingId: bookingId, phase: .return,
                                             photos: photos, aiResult: results, aiProvider: provider,
                                             ownerDecision: [:]))

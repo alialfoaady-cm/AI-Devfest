@@ -36,7 +36,7 @@ private struct TripCard: View {
                 .clipShape(RoundedRectangle(cornerRadius: Theme.radius))
             pill(stage)
             Text("\(car?.model ?? "Car") at \(car?.airport ?? "")").font(.title3.weight(.heavy)).foregroundStyle(Theme.text)
-            Text("\(Day.short(booking.from)) to \(Day.short(booking.to)), \(plural(booking.days, "credit"))")
+            Text("\(Day.short(booking.from)) to \(Day.short(booking.to))" + (booking.status == .cancelled ? "" : ", \(plural(Rules.tripCost(booking.days) + (booking.mileage?.credits ?? 0), "credit"))"))
                 .font(.subheadline).foregroundStyle(Theme.textSoft)
             NavigationLink(value: booking.id) { Text(action(stage)) }
                 .modifier(StageButton(stage: stage))
@@ -49,6 +49,7 @@ private struct TripCard: View {
         case .pickup: Pill(text: "Ready to pick up", color: Theme.greenText)
         case .driving: Pill(text: "On the road", color: Theme.text)
         case .returned: Pill(text: "Returned", color: Theme.textSoft)
+        case .cancelled: Pill(text: "Cancelled", color: Theme.textSoft)
         }
     }
 
@@ -57,6 +58,7 @@ private struct TripCard: View {
         case .pickup: "Find the car"
         case .driving: "Return the car"
         case .returned: "See return report"
+        case .cancelled: "See what happened"
         }
     }
 }
@@ -64,6 +66,6 @@ private struct TripCard: View {
 private struct StageButton: ViewModifier {
     let stage: TripStage
     func body(content: Content) -> some View {
-        if stage == .returned { content.buttonStyle(.secondary) } else { content.buttonStyle(.primary) }
+        if stage == .returned || stage == .cancelled { content.buttonStyle(.secondary) } else { content.buttonStyle(.primary) }
     }
 }

@@ -5,12 +5,12 @@ import Foundation
 enum SampleData {
     static let state = AppState(
         users: [
-            User(id: "user-a", name: "Avery (demo A)", credits: 2),
-            User(id: "user-b", name: "Blake (demo B)", credits: 10),
+            User(id: "user-a", name: "Avery (demo A)", credits: 70),
+            User(id: "user-b", name: "Blake (demo B)", credits: 350),
             // Test owners, so there are more cars to find than the two demo ones.
-            User(id: "user-c", name: "Casey (test)", credits: 5),
-            User(id: "user-d", name: "Drew (test)", credits: 5),
-            User(id: "user-e", name: "Emery (test)", credits: 5),
+            User(id: "user-c", name: "Casey (test)", credits: Config.startingCredits),
+            User(id: "user-d", name: "Drew (test)", credits: Config.startingCredits),
+            User(id: "user-e", name: "Emery (test)", credits: Config.startingCredits),
         ],
         cars: [
             Car(id: "car-a", ownerId: "user-a", airport: "DTW", model: "Blue hatchback", seats: 5,

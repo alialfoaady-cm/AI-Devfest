@@ -32,13 +32,6 @@ struct FindCarView: View {
             summary
 
             if let error { ErrorBanner(message: error) }
-            if days >= 1 && credits < days && !results.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    AmberNote(message: "This trip needs \(plural(days, "credit")) and you have \(credits). Lend your car to earn more, or shorten the trip.")
-                    Button("Lend my car", action: onLend).buttonStyle(.secondary)
-                }
-            }
-
             ForEach(results) { car in carCard(car) }
 
             if days >= 1 && results.isEmpty {
@@ -52,12 +45,11 @@ struct FindCarView: View {
         .onChange(of: airport) { error = nil }
         .onChange(of: from) { error = nil }
         .onChange(of: to) { error = nil }
-        .alert(pending.map { "Book the \($0.model)?" } ?? "",
-               isPresented: Binding(get: { pending != nil }, set: { if !$0 { pending = nil } })) {
-            Button("Cancel", role: .cancel) {}
-            Button("Book") { if let car = pending { book(car) } }
-        } message: {
-            Text("\(Day.short(from)) to \(Day.short(to)). \(plural(days, "credit")) come off your balance now. The owner gets them when you return the car.")
+        .sheet(item: $pending) { car in
+            BookSheet(car: car, from: from, to: to) { bookingId in
+                pending = nil
+                onBooked(bookingId)
+            }
         }
     }
 
@@ -65,7 +57,7 @@ struct FindCarView: View {
         if days >= 1 {
             let place = Airport.named(airport)?.city ?? airport
             (Text(plural(results.count, "car")).bold().foregroundStyle(Theme.text)
-             + Text(" at \(place) for \(plural(days, "day")). Each costs \(plural(days, "credit")); you have \(credits)."))
+             + Text(" at \(place) for \(plural(days, "day")). Each costs \(priceText(Rules.tripCost(days))); you have \(plural(credits, "credit"))."))
                 .font(.subheadline)
                 .foregroundStyle(Theme.textSoft)
         } else {
@@ -85,24 +77,82 @@ struct FindCarView: View {
             Text("\(plural(car.seats, "seat")). Lent by \(store.state.firstName(car.ownerId)), back by \(Day.short(car.to)).")
                 .font(.subheadline).foregroundStyle(Theme.textSoft)
             HStack {
-                (Text(plural(days, "credit")).bold().foregroundStyle(Theme.text)
-                 + Text(" for \(plural(days, "day"))").foregroundStyle(Theme.textSoft))
-                    .monospacedDigit()
+                VStack(alignment: .leading, spacing: 2) {
+                    (Text(plural(Rules.tripCost(days), "credit")).bold().foregroundStyle(Theme.text)
+                     + Text(" for \(plural(days, "day"))").foregroundStyle(Theme.textSoft))
+                    Text("or \(usd(Double(Rules.tripCost(days)) * Config.usdPerCredit))")
+                        .font(.caption).foregroundStyle(Theme.textSoft)
+                }
+                .monospacedDigit()
                 Spacer()
                 Button("Book") { pending = car }
                     .buttonStyle(.primary)
                     .frame(width: 110)
-                    .disabled(credits < days)
             }
         }
         .padding(.bottom, 10)
     }
 
-    private func book(_ car: Car) {
+}
+
+/// The booking window: the car, the dates, what it costs, and how to pay for it.
+private struct BookSheet: View {
+    @Environment(AppStore.self) private var store
+    @Environment(\.dismiss) private var dismiss
+    let car: Car
+    let from: String
+    let to: String
+    var onBooked: (String) -> Void
+
+    @State private var useCredits = true
+    @State private var error: String?
+
+    var body: some View {
+        let days = Rules.tripDays(from, to)
+        let cost = Rules.tripCost(days)
+        let balance = store.currentUser?.credits ?? 0
+        let credits = Rules.creditsToUse(cost, balance: balance, useCredits: useCredits)
+
+        NavigationStack {
+            Screen {
+                CarSummary(car: car, owner: store.state.user(car.ownerId))
+                Card {
+                    row("Dates", "\(Day.short(from)) to \(Day.short(to))")
+                    row("Miles included", "\(days * Config.milesIncludedPerDay)")
+                    row("Price", priceText(cost))
+                    Text("Each mile past \(days * Config.milesIncludedPerDay) costs 1 more credit, paid when you return the car. The owner gets the credits on return.")
+                        .font(.caption).foregroundStyle(Theme.textSoft)
+                }
+                PayChoiceView(cost: cost, balance: balance, useCredits: $useCredits)
+                if let error { ErrorBanner(message: error) }
+                Button("Book for \(payText(Payment(credits: credits, usd: Double(cost - credits) * Config.usdPerCredit)))") {
+                    book(credits)
+                }
+                .buttonStyle(.primary)
+            }
+            .navigationTitle("Book the \(car.model)")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } } }
+        }
+        .preferredColorScheme(.dark)
+        .tint(Theme.green)
+    }
+
+    private func row(_ term: String, _ value: String) -> some View {
+        HStack {
+            Text(term).foregroundStyle(Theme.textSoft)
+            Spacer()
+            Text(value).fontWeight(.semibold).foregroundStyle(Theme.text).monospacedDigit()
+        }
+        .font(.subheadline)
+    }
+
+    private func book(_ credits: Int) {
         do {
             var booking: Booking?
-            try store.update { booking = try Rules.book(&$0, userId: store.currentUserId, carId: car.id, from: from, to: to) }
-            error = nil
+            try store.update {
+                booking = try Rules.book(&$0, userId: store.currentUserId, carId: car.id, from: from, to: to, creditsUsed: credits)
+            }
             if let booking { onBooked(booking.id) }
         } catch {
             self.error = error.localizedDescription

@@ -17,7 +17,7 @@ struct LendView: View {
 
     var body: some View {
         Screen {
-            Text("One credit for every day someone borrows it, paid when it comes back.")
+            Text("\(Config.creditsPerDay) credits for every day someone borrows it, plus 1 for each mile past \(Config.milesIncludedPerDay) a day. Paid when it comes back.")
                 .font(.subheadline).foregroundStyle(Theme.textSoft)
 
             if myCars.isEmpty {
@@ -85,7 +85,8 @@ struct LendView: View {
 
     private func borrowerRow(_ loan: Booking) -> some View {
         let name = store.state.firstName(loan.userId)
-        let returned = store.state.stage(loan.id) == .returned
+        let stage = store.state.stage(loan.id)
+        let returned = stage == .returned
         return VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 10) {
                 Initial(name: name)
@@ -93,10 +94,12 @@ struct LendView: View {
                  + Text(", \(Day.short(loan.from)) to \(Day.short(loan.to))").foregroundStyle(Theme.textSoft))
                     .font(.subheadline)
                 Spacer()
-                Pill(text: returned ? "Earned \(loan.days)" : "Earns \(loan.days)",
+                Pill(text: stage == .cancelled ? "Cancelled"
+                        : returned ? "Earned \(Rules.tripCost(loan.days) + (loan.mileage?.credits ?? 0))"
+                        : "Earns \(Rules.tripCost(loan.days))",
                      color: returned ? Theme.greenText : Theme.textSoft)
             }
-            if store.state.stage(loan.id) != .pickup {
+            if stage == .driving || stage == .returned {
                 Button(returned ? "Review return photos" : "See the trip") { path.append(.trip(bookingId: loan.id)) }
                     .buttonStyle(.secondary)
             }

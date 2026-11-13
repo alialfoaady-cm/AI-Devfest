@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum AppTab: Hashable { case find, lend, trips }
+enum AppTab: Hashable { case find, lend, trips, insurance }
 
 struct ContentView: View {
     @Environment(AppStore.self) private var store
@@ -42,6 +42,13 @@ struct ContentView: View {
                         .navigationTitle("Trips")
                         .toolbar { AccountMenu() }
                         .navigationDestination(for: String.self) { TripDetailView(bookingId: $0) }
+                }
+            }
+            Tab("Insure", systemImage: "checkmark.shield.fill", value: .insurance) {
+                NavigationStack {
+                    InsuranceView(onFind: { tab = .find })
+                        .navigationTitle("Insurance")
+                        .toolbar { AccountMenu() }
                 }
             }
         }

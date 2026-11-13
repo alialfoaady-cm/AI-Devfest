@@ -9,6 +9,30 @@ enum Config {
     /// Shown next to the impact figure so nobody reads the estimate as a fact.
     static let impactLabel = "rental cost avoided (estimate)"
 
+    /// Credits are miles: one credit pays for one mile. A day of a trip includes 35 miles, so a day
+    /// costs 35 credits, and every mile past a trip's total costs one more. Same as lib/config.ts.
+    static let milesIncludedPerDay = 35
+    static let creditsPerExtraMile = 1
+    static let creditsPerDay = milesIncludedPerDay * creditsPerExtraMile
+
+    /// What a credit costs in money. Any price can be paid in credits, in dollars, or part in each.
+    static let usdPerCredit = 1.5
+
+    /// Cover for a trip: with it Sayara pays for damage the owner confirms, without it the borrower does.
+    static let insuranceCreditsPerDay = 10
+
+    /// A day of airport parking, in dollars. An estimate: real rates differ by airport and by lot.
+    static let parkingFeePerDayUSDEstimate = 20.0
+
+    /// Sayara's share when a trip is cancelled, on top of the other person's parking fees.
+    static let cancellationCut = 0.15
+
+    /// The dashboard reading is stored in kilometres.
+    static let kmPerMile = 1.609344
+
+    /// What a new account starts with: a first week away, before lending a car.
+    static let startingCredits = 7 * creditsPerDay
+
     /// A finding below this confidence is shown as "unsure", never as damage.
     static let minDamageConfidence = 0.6
 

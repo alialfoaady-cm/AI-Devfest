@@ -7,6 +7,15 @@ struct CompareReportView: View {
     let pickup: Inspection
     let returned: Inspection
     let canDecide: Bool
+    var borrowerName = "the borrower"
+    /// The borrower bought cover for this trip.
+    var insured = false
+
+    /// Who pays for damage the owner confirms. The report is shown to the owner (who can decide) and to the borrower.
+    private var payer: String {
+        insured ? "This trip is insured, so Sayara pays for the repair."
+            : "This trip is not insured, so \(canDecide ? borrowerName : "you") \(canDecide ? "pays" : "pay") for the repair."
+    }
 
     private var results: [Slot: InspectionResult] { returned.aiResult ?? [:] }
 
@@ -28,7 +37,7 @@ struct CompareReportView: View {
         let flagged = Slot.allCases.filter { Verdict.slot(results[$0]) == .flagged }.count
         let unsure = Slot.allCases.filter { Verdict.slot(results[$0]) == .unsure }.count
         return HStack(spacing: 10) {
-            stat(Verdict.kmDriven(dash).map { "\($0)" } ?? "—", "km driven")
+            stat(Verdict.kmDriven(dash).map { "\(Int((Double($0) / Config.kmPerMile).rounded()))" } ?? "—", "mi driven")
             stat(dash?.fuelLevel ?? "—", "fuel now")
             stat("\(flagged)", "flagged", color: flagged > 0 ? Theme.flag : Theme.green)
             stat("\(unsure)", "unsure", color: unsure > 0 ? Theme.unsure : Theme.textSoft)
@@ -123,6 +132,8 @@ struct CompareReportView: View {
                           systemImage: decision == .confirmed ? "checkmark.seal.fill" : "xmark.seal.fill")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(decision == .confirmed ? Theme.flag : Theme.green)
+                    Text(decision == .confirmed ? payer : "Nobody pays for a disputed flag.")
+                        .font(.caption).foregroundStyle(Theme.textSoft)
                 }
                 if canDecide {
                     HStack(spacing: 8) {

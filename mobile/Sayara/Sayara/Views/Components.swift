@@ -197,14 +197,15 @@ struct LockerCodeView: View {
         let code = Rules.lockerCode(bookingId)
         Card {
             Label("Key locker code", systemImage: "lock.open.fill")
-                .font(.headline).foregroundStyle(Theme.text)
+                .font(.headline).foregroundStyle(Theme.greenText)
             HStack(spacing: 10) {
                 ForEach(Array(code.enumerated()), id: \.offset) { _, digit in
                     Text(String(digit))
                         .font(.system(size: 44, weight: .bold, design: .rounded))
-                        .foregroundStyle(.black)
+                        .foregroundStyle(Theme.greenText)
                         .frame(width: 58, height: 72)
-                        .background(.white, in: RoundedRectangle(cornerRadius: 8))
+                        .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 12))
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.greenText.opacity(0.4)))
                 }
             }
             .accessibilityElement(children: .ignore)

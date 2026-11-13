@@ -59,7 +59,34 @@ struct Car: Codable, Identifiable, Equatable {
 }
 
 enum BookingStatus: String, Codable {
-    case booked, returned
+    case booked, returned, cancelled
+}
+
+/// A price paid part in credits and part in dollars (either part can be zero). Same as `Payment` in lib/types.ts.
+struct Payment: Codable, Equatable {
+    var credits: Int
+    var usd: Double
+    static let zero = Payment(credits: 0, usd: 0)
+}
+
+/// Miles driven against the miles a trip includes, and what the extra ones cost in credits.
+struct MileageCharge: Codable, Equatable {
+    var miles: Int
+    var included: Int
+    var extraMiles: Int
+    var credits: Int
+}
+
+/// Set when a trip was cancelled before pickup.
+struct Cancellation: Codable, Equatable {
+    /// Who cancelled: the borrower or the owner.
+    var by: String
+    /// What the canceller paid.
+    var fee: Payment
+    /// The part of the fee paid to the other person, for their parking.
+    var parkingCredits: Int
+    /// What the borrower got back.
+    var refund: Payment
 }
 
 struct Booking: Codable, Identifiable, Equatable {
@@ -70,6 +97,14 @@ struct Booking: Codable, Identifiable, Equatable {
     var to: String
     var days: Int
     var status: BookingStatus
+    /// How the trip was paid for.
+    var paid: Payment? = nil
+    /// Set when the borrower bought cover: Sayara pays for damage the owner confirms.
+    var insurance: Payment? = nil
+    /// Set on return, when both odometer readings could be read.
+    var mileage: MileageCharge? = nil
+    /// Set when the trip was cancelled before pickup.
+    var cancelled: Cancellation? = nil
 }
 
 /// One finding from the model. It is a flag for a person to review, never a verdict.
@@ -134,8 +169,11 @@ struct AppState: Codable, Equatable {
 
     /// Where a trip is: waiting for pickup photos, on the road, or returned.
     func stage(_ bookingId: String) -> TripStage {
-        if booking(bookingId)?.status == .returned { return .returned }
-        return inspection(bookingId, .pickup) == nil ? .pickup : .driving
+        switch booking(bookingId)?.status {
+        case .returned?: return .returned
+        case .cancelled?: return .cancelled
+        default: return inspection(bookingId, .pickup) == nil ? .pickup : .driving
+        }
     }
 
     func firstName(_ userId: String) -> String {
@@ -144,7 +182,7 @@ struct AppState: Codable, Equatable {
 }
 
 enum TripStage: Int {
-    case pickup, driving, returned
+    case pickup, driving, returned, cancelled
 }
 
 struct RuleError: LocalizedError {
