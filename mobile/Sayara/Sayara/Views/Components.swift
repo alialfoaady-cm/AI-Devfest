@@ -119,6 +119,8 @@ struct CarPhotoView: View {
         ZStack {
             if let preview {
                 Image(uiImage: preview).resizable().scaledToFill()
+            } else if let spec = car?.photo, SampleCarPortrait.isSample(spec) {
+                SampleCarPortrait(spec: spec)
             } else if let name = car?.photo, let image = PhotoStore.load(name) {
                 Image(uiImage: image).resizable().scaledToFill()
             } else {
