@@ -41,7 +41,12 @@ enum SampleData {
                 pin: Pin(lat: 49.1932, lng: -123.1795), spot: "P2-58", photo: "/cars/tesla-model-3.png"),
         ] + SeedListings.cars,
         bookings: [],
-        inspections: []
+        inspections: [],
+        // So the Home page has something to show right after a reset: Blake tracks two cars and
+        // has searched Chicago and Detroit before.
+        tracked: ["user-b": ["car-c", "seed-car-ord-1"]],
+        searches: ["user-b": [SavedSearch(airport: "ORD", from: "2026-11-20", to: "2026-11-27"),
+                              SavedSearch(airport: "DTW", from: "2026-12-20", to: "2026-12-27")]]
     )
 
     static let defaultUserId = "user-b"

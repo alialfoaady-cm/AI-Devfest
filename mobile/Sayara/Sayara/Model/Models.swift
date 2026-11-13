@@ -154,6 +154,13 @@ struct Inspection: Codable, Identifiable, Equatable {
     var ownerDecision: [String: OwnerDecision]
 }
 
+/// One search on Find a car: where and when.
+struct SavedSearch: Codable, Equatable {
+    var airport: String
+    var from: String
+    var to: String
+}
+
 /// One chat message on a trip, between its borrower and the car's owner.
 struct ChatMessage: Codable, Identifiable, Equatable {
     let id: String
@@ -170,13 +177,20 @@ struct AppState: Codable, Equatable {
     var inspections: [Inspection]
     /// Phone-only for now: the web app has no chat yet.
     var messages: [ChatMessage] = []
+    /// Cars each user tracks (the heart on a car): user id -> car ids, newest first. Phone-only.
+    var tracked: [String: [String]] = [:]
+    /// Each user's recent searches on Find a car, newest first. Feeds the Home page's recommendations. Phone-only.
+    var searches: [String: [SavedSearch]] = [:]
 
-    init(users: [User], cars: [Car], bookings: [Booking], inspections: [Inspection], messages: [ChatMessage] = []) {
+    init(users: [User], cars: [Car], bookings: [Booking], inspections: [Inspection], messages: [ChatMessage] = [],
+         tracked: [String: [String]] = [:], searches: [String: [SavedSearch]] = [:]) {
         self.users = users
         self.cars = cars
         self.bookings = bookings
         self.inspections = inspections
         self.messages = messages
+        self.tracked = tracked
+        self.searches = searches
     }
 
     // Saved data from before chat existed has no "messages": read it as no messages, not as broken data.
@@ -187,7 +201,11 @@ struct AppState: Codable, Equatable {
         bookings = try c.decode([Booking].self, forKey: .bookings)
         inspections = try c.decode([Inspection].self, forKey: .inspections)
         messages = try c.decodeIfPresent([ChatMessage].self, forKey: .messages) ?? []
+        tracked = try c.decodeIfPresent([String: [String]].self, forKey: .tracked) ?? [:]
+        searches = try c.decodeIfPresent([String: [SavedSearch]].self, forKey: .searches) ?? [:]
     }
+
+    func isTracked(_ carId: String, by userId: String) -> Bool { tracked[userId]?.contains(carId) == true }
 
     func messages(_ bookingId: String) -> [ChatMessage] {
         messages.filter { $0.bookingId == bookingId }.sorted { $0.sentAt < $1.sentAt }

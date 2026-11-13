@@ -6,9 +6,10 @@ struct FindCarView: View {
     var onBooked: (String) -> Void
     var onLend: () -> Void
 
-    @State private var airport = SampleData.defaultAirport
-    @State private var from = SampleData.defaultFrom
-    @State private var to = SampleData.defaultTo
+    // The search lives on the store, so Home can open Find on a car's airport and dates.
+    private var airport: String { store.searchAirport }
+    private var from: String { store.searchFrom }
+    private var to: String { store.searchTo }
     @State private var error: String?
     @State private var pending: Car?
     @State private var shown: String?   // id of the car in the middle of the carousel
@@ -26,8 +27,8 @@ struct FindCarView: View {
 
             Card {
                 Text("Where").font(.caption.weight(.semibold)).foregroundStyle(Theme.textSoft)
-                AirportPicker(code: $airport)
-                DayRangePicker(fromLabel: "Pick up", toLabel: "Return", from: $from, to: $to)
+                AirportPicker(code: Bindable(store).searchAirport)
+                DayRangePicker(fromLabel: "Pick up", toLabel: "Return", from: Bindable(store).searchFrom, to: Bindable(store).searchTo)
             }
 
             summary
@@ -43,15 +44,20 @@ struct FindCarView: View {
                 }
             }
         }
-        .onChange(of: airport) { error = nil }
-        .onChange(of: from) { error = nil }
-        .onChange(of: to) { error = nil }
+        .onChange(of: airport) { error = nil; remember() }
+        .onChange(of: from) { error = nil; remember() }
+        .onChange(of: to) { error = nil; remember() }
         .sheet(item: $pending) { car in
             BookSheet(car: car, from: from, to: to) { bookingId in
                 pending = nil
                 onBooked(bookingId)
             }
         }
+    }
+
+    /// Every search is remembered for the Home page's "Because you searched" rows.
+    private func remember() {
+        try? store.update { Recommend.recordSearch(&$0, userId: store.currentUserId, airport: airport, from: from, to: to) }
     }
 
     @ViewBuilder private var summary: some View {
@@ -64,6 +70,15 @@ struct FindCarView: View {
         } else {
             Text("Pick a return date at least one day after pickup.")
                 .font(.subheadline).foregroundStyle(Theme.flag)
+        }
+    }
+
+    /// Starts the carousel on the car Home opened Find for, if it is in the results; otherwise on the first.
+    private func focus() {
+        if let id = store.searchFocusCar, results.contains(where: { $0.id == id }) {
+            shown = id
+        } else {
+            shown = results.first?.id
         }
     }
 
@@ -100,7 +115,8 @@ struct FindCarView: View {
                 .accessibilityLabel("Car \(index + 1) of \(results.count)")
             }
         }
-        .onChange(of: results.map(\.id)) { shown = results.first?.id }
+        .onChange(of: results.map(\.id), initial: true) { focus() }
+        .onChange(of: store.searchFocusCar) { focus() }
     }
 
     /// Turo-style card: big 3:2 photo, heavy name, one line of facts, price and Book.
@@ -110,6 +126,7 @@ struct FindCarView: View {
                 .aspectRatio(3 / 2, contentMode: .fit)
                 .frame(maxWidth: .infinity)
                 .clipShape(RoundedRectangle(cornerRadius: Theme.radius))
+                .overlay(alignment: .topTrailing) { TrackButton(carId: car.id).padding(10) }
             Text(car.model).font(.title3.weight(.heavy)).foregroundStyle(Theme.text)
             Text("\(plural(car.seats, "seat")). Lent by \(store.state.firstName(car.ownerId)), back by \(Day.short(car.to)).")
                 .font(.subheadline).foregroundStyle(Theme.textSoft)

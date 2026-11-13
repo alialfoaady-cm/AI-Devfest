@@ -1,16 +1,31 @@
 import SwiftUI
 
-enum AppTab: Hashable { case find, lend, trips, insurance }
+enum AppTab: Hashable { case home, find, lend, trips, insurance }
 
 struct ContentView: View {
     @Environment(AppStore.self) private var store
-    @State private var tab: AppTab = .find
+    @State private var tab: AppTab = .home
     @State private var tripsPath: [String] = [] // booking ids
     @State private var lendPath: [LendRoute] = []
 
     var body: some View {
         TabView(selection: $tab) {
-            Tab("Find a car", systemImage: "magnifyingglass", value: .find) {
+            Tab("Home", systemImage: "house.fill", value: .home) {
+                NavigationStack {
+                    HomeView(onOpen: { airport, from, to, carId in
+                        store.searchAirport = airport
+                        store.searchFrom = from
+                        store.searchTo = to
+                        store.searchFocusCar = carId
+                        tab = .find
+                    }, onTrip: { bookingId in
+                        tripsPath = [bookingId]
+                        tab = .trips
+                    })
+                    .toolbar { AccountMenu() }
+                }
+            }
+            Tab("Find", systemImage: "magnifyingglass", value: .find) {
                 NavigationStack {
                     FindCarView(onBooked: { bookingId in
                         tripsPath = [bookingId]

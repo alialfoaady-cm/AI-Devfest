@@ -85,7 +85,6 @@ struct GlassBackdrop: View {
         ZStack {
             Theme.background
             if Theme.liquidGlass {
-                RadialGradient(colors: [Theme.green.opacity(0.22), .clear], center: .topTrailing, startRadius: 0, endRadius: 420)
                 RadialGradient(colors: [Color(hex: 0x1F6BDC).opacity(0.16), .clear], center: .bottomLeading, startRadius: 0, endRadius: 460)
             }
         }

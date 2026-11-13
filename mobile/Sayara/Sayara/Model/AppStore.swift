@@ -25,6 +25,13 @@ final class AppStore {
 
     var currentUser: User? { state.user(currentUserId) }
 
+    /// What Find a car is showing. Lives here so Home can open Find on a car's airport and dates.
+    var searchAirport = SampleData.defaultAirport
+    var searchFrom = SampleData.defaultFrom
+    var searchTo = SampleData.defaultTo
+    /// The car Home opened Find a car for: the carousel scrolls to it.
+    var searchFocusCar: String?
+
     /// Runs a change on a copy; the state only updates and saves if every rule passes.
     func update(_ change: (inout AppState) throws -> Void) throws {
         var copy = state
