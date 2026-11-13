@@ -23,21 +23,44 @@ enum Config {
     static let inspectionServerURL: URL? = nil
 }
 
-/// `latitude`/`longitude` is where the map opens before an owner drops a pin: the parking garage
-/// Google Maps lists for the McNamara terminal (DTW) and Terminal 1 (YYZ). Same as AIRPORT_PARKING
-/// in the web app's lib/config.ts.
+/// A US or Canadian passenger airport. The full list is in AirportList.swift.
 struct Airport: Identifiable, Hashable {
-    let code: String
-    let name: String
+    let code: String      // IATA, e.g. "DTW"
+    let name: String      // official name, e.g. "Detroit Metropolitan Wayne County Airport"
+    let city: String
+    let region: String    // state or province, e.g. "MI", "ON"
+    let country: String   // "US" or "CA"
     let latitude: Double
     let longitude: Double
     var id: String { code }
-    var coordinate: CLLocationCoordinate2D { .init(latitude: latitude, longitude: longitude) }
 
-    static let all = [
-        Airport(code: "DTW", name: "Detroit Metro", latitude: 42.2068, longitude: -83.3555),
-        Airport(code: "YYZ", name: "Toronto Pearson", latitude: 43.6831, longitude: -79.6135),
+    /// "Detroit (DTW)"
+    var label: String { "\(city.isEmpty ? name : city) (\(code))" }
+    /// "Detroit, MI"
+    var place: String { [city, region].filter { !$0.isEmpty }.joined(separator: ", ") }
+
+    /// Where the map opens before an owner drops a pin. For the two demo airports this is the
+    /// parking garage (same as AIRPORT_PARKING in the web app); elsewhere it is the airport itself.
+    var coordinate: CLLocationCoordinate2D {
+        if let garage = Self.parking[code] { return garage }
+        return .init(latitude: latitude, longitude: longitude)
+    }
+
+    private static let parking: [String: CLLocationCoordinate2D] = [
+        "DTW": .init(latitude: 42.2068, longitude: -83.3555), // McNamara terminal garage
+        "YYZ": .init(latitude: 43.6831, longitude: -79.6135), // Terminal 1 garage
     ]
 
-    static func named(_ code: String) -> Airport? { all.first { $0.code == code } }
+    static var all: [Airport] { list }
+
+    private static let byCode: [String: Airport] = Dictionary(uniqueKeysWithValues: list.map { ($0.code, $0) })
+    static func named(_ code: String) -> Airport? { byCode[code] }
+
+    /// Matches a search against code, city, name and state or province.
+    func matches(_ query: String) -> Bool {
+        let q = query.trimmingCharacters(in: .whitespaces)
+        guard !q.isEmpty else { return true }
+        if code.caseInsensitiveCompare(q) == .orderedSame { return true }
+        return [code, city, name, region].contains { $0.localizedStandardContains(q) }
+    }
 }

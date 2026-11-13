@@ -59,7 +59,7 @@ struct LendView: View {
             VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(car.model).font(.title3.bold()).foregroundStyle(Theme.text)
-                    Text("\(Airport.named(car.airport)?.name ?? car.airport). Free from \(Day.short(car.from)) until you land on \(Day.short(car.to)).")
+                    Text("\(Airport.named(car.airport)?.label ?? car.airport). Free from \(Day.short(car.from)) until you land on \(Day.short(car.to)).")
                         .font(.subheadline).foregroundStyle(Theme.textSoft)
                 }
                 if car.pin == nil {

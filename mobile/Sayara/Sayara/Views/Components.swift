@@ -22,14 +22,90 @@ struct DayRangePicker: View {
     }
 }
 
+/// Shows the chosen airport; tap to search all US and Canadian passenger airports.
 struct AirportPicker: View {
     @Binding var code: String
+    @State private var choosing = false
 
     var body: some View {
-        Picker("Airport", selection: $code) {
-            ForEach(Airport.all) { Text("\($0.name) (\($0.code))").tag($0.code) }
+        let airport = Airport.named(code)
+        Button { choosing = true } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "airplane").font(.headline).foregroundStyle(Theme.green)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(airport?.label ?? code).font(.headline).foregroundStyle(Theme.text)
+                    Text(airport?.name ?? "Pick an airport").font(.caption).foregroundStyle(Theme.textSoft).lineLimit(1)
+                }
+                Spacer()
+                Image(systemName: "chevron.up.chevron.down").font(.caption).foregroundStyle(Theme.textSoft)
+            }
+            .padding(14)
+            .background(Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 8))
         }
-        .pickerStyle(.segmented)
+        .buttonStyle(.plain)
+        .sheet(isPresented: $choosing) { AirportSearchSheet(code: $code) }
+    }
+}
+
+private struct AirportSearchSheet: View {
+    @Environment(AppStore.self) private var store
+    @Environment(\.dismiss) private var dismiss
+    @Binding var code: String
+    @State private var query = ""
+
+    /// Airports where at least one car is listed, so the demo airports are one tap away.
+    private var withCars: [Airport] {
+        Set(store.state.cars.map(\.airport)).compactMap(Airport.named).sorted { $0.city < $1.city }
+    }
+
+    private func results(_ country: String) -> [Airport] {
+        Airport.all.filter { $0.country == country && $0.matches(query) }
+            .sorted { ($0.city, $0.code) < ($1.city, $1.code) }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                if query.isEmpty && !withCars.isEmpty {
+                    Section("Cars listed here") { ForEach(withCars) { row($0) } }
+                }
+                let us = results("US"), ca = results("CA")
+                if !us.isEmpty { Section("United States") { ForEach(us) { row($0) } } }
+                if !ca.isEmpty { Section("Canada") { ForEach(ca) { row($0) } } }
+                if us.isEmpty && ca.isEmpty {
+                    Text("No airport matches \u{201C}\(query)\u{201D}.").foregroundStyle(Theme.textSoft)
+                }
+            }
+            .scrollContentBackground(.hidden)
+            .background(Theme.background)
+            .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
+                        prompt: "City, airport or code")
+            .navigationTitle("Airport")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } } }
+        }
+        .preferredColorScheme(.dark)
+        .tint(Theme.green)
+    }
+
+    private func row(_ airport: Airport) -> some View {
+        Button {
+            code = airport.code
+            dismiss()
+        } label: {
+            HStack(spacing: 12) {
+                Text(airport.code)
+                    .font(.subheadline.weight(.bold)).monospaced()
+                    .foregroundStyle(airport.code == code ? Theme.onGreen : Theme.text)
+                    .frame(width: 52, height: 32)
+                    .background(airport.code == code ? Theme.green : Theme.surfaceRaised, in: RoundedRectangle(cornerRadius: 6))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(airport.place).foregroundStyle(Theme.text)
+                    Text(airport.name).font(.caption).foregroundStyle(Theme.textSoft).lineLimit(1)
+                }
+            }
+        }
+        .listRowBackground(Theme.surface)
     }
 }
 

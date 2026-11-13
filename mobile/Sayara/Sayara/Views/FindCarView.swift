@@ -44,7 +44,7 @@ struct FindCarView: View {
             if days >= 1 && results.isEmpty {
                 EmptyState(symbol: "car.side",
                            title: "No cars at \(airport) for those dates yet",
-                           message: "Try other dates or the other airport. If you park here when you fly, your car could be the first.") {
+                           message: "Try other dates or another airport. If you park here when you fly, your car could be the first.") {
                     Button("List my car", action: onLend).buttonStyle(.primary)
                 }
             }
@@ -63,7 +63,7 @@ struct FindCarView: View {
 
     @ViewBuilder private var summary: some View {
         if days >= 1 {
-            let place = Airport.named(airport)?.name ?? airport
+            let place = Airport.named(airport)?.city ?? airport
             (Text(plural(results.count, "car")).bold().foregroundStyle(Theme.text)
              + Text(" at \(place) for \(plural(days, "day")). Each costs \(plural(days, "credit")); you have \(credits)."))
                 .font(.subheadline)
