@@ -53,6 +53,18 @@ export function Notice({ tone = "red", children }: { tone?: "red" | "amber"; chi
 
 /** The car's picture, or a plain tile when its owner has not added one. */
 export function CarPhoto({ photo, model, className = "" }: { photo?: string; model: string; className?: string }) {
+  // The demo listings' photos (public/cars) are cutouts with no background: set each one on the same
+  // showroom floor, whole and centred, so cars from different photos line up card to card.
+  if (photo?.startsWith("/cars/")) {
+    return (
+      <span className={`relative block overflow-hidden bg-surface ${className}`}>
+        <span aria-hidden className="absolute inset-0 bg-[radial-gradient(ellipse_75%_65%_at_50%_30%,var(--surface-2),transparent)]" />
+        <span aria-hidden className="absolute inset-x-0 bottom-0 h-[32%] bg-gradient-to-b from-transparent to-surface-2" />
+        <span aria-hidden className="absolute bottom-[16%] left-1/2 h-[9%] w-[74%] -translate-x-1/2 rounded-[50%] bg-black/45 blur-[10px]" />
+        <img src={photo} alt={model} className="absolute bottom-[19%] left-1/2 h-[62%] w-[84%] -translate-x-1/2 object-contain object-bottom" />
+      </span>
+    );
+  }
   return photo ? (
     <img src={photo} alt={model} className={`bg-surface object-cover ${className}`} />
   ) : (
