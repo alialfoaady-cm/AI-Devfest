@@ -4,8 +4,9 @@ import { CarProfile } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Select } from "@/components/Select";
 import { CarPhoto, Empty, Notice, Segment, btnPrimary, btnStrong, carGrid, carPhoto, cardTitle, pageTitle, searchBar, segmentControl } from "@/components/ui";
-import { AIRPORTS } from "@/lib/config";
+import { AIRPORT_OPTIONS, AIRPORTS } from "@/lib/config";
 import { isoDay, plural, shortDate } from "@/lib/format";
 import { availableCars, tripDays } from "@/lib/rules";
 import { act, useStore, useTask } from "@/lib/store";
@@ -40,15 +41,7 @@ export default function FindPage() {
       </h1>
 
       <form className={`${searchBar} mt-6`} onSubmit={(event) => event.preventDefault()}>
-        <Segment label="Where">
-          <select className={segmentControl} value={search.airport} onChange={(event) => change({ airport: event.target.value })}>
-            {Object.entries(AIRPORTS).map(([code, name]) => (
-              <option key={code} value={code}>
-                {name} ({code})
-              </option>
-            ))}
-          </select>
-        </Segment>
+        <Select variant="segment" label="Where" value={search.airport} options={AIRPORT_OPTIONS} onChange={(airport) => change({ airport })} />
         <Segment label="Pick up">
           <input type="date" required className={segmentControl} value={search.from} onChange={(event) => change({ from: event.target.value })} />
         </Segment>

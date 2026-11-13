@@ -36,3 +36,6 @@ export const AIRPORTS: Record<string, string> = {
   DTW: "Detroit Metro",
   YYZ: "Toronto Pearson",
 };
+
+/** The airports as dropdown options: the name, tagged with the code. */
+export const AIRPORT_OPTIONS = Object.entries(AIRPORTS).map(([code, name]) => ({ value: code, label: name, tag: code }));

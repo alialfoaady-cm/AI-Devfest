@@ -84,10 +84,12 @@ export function Empty({ icon: IconCmp, title, children, action }: { icon: Icon; 
 
 /**
  * One part of a search bar: a small label over a native control, as on a booking site.
- * Put several in a `searchBar` row.
+ * Put several in a `searchBar` row. For a dropdown part, use <Select variant="segment">.
  */
 export const searchBar =
-  "grid divide-y divide-line overflow-hidden rounded-xl border border-line bg-canvas sm:grid-flow-col sm:auto-cols-fr sm:divide-x sm:divide-y-0";
+  "grid divide-y divide-line rounded-xl border border-line bg-canvas sm:grid-flow-col sm:auto-cols-fr sm:divide-x sm:divide-y-0 " +
+  // Not overflow-hidden: a dropdown's list has to reach outside. The end parts round their own outer corners.
+  "[&>:first-child]:rounded-t-[11px] [&>:last-child]:rounded-b-[11px] sm:[&>:first-child]:rounded-l-[11px] sm:[&>:first-child]:rounded-tr-none sm:[&>:last-child]:rounded-r-[11px] sm:[&>:last-child]:rounded-bl-none";
 
 export function Segment({ label, children }: { label: string; children: ReactNode }) {
   return (
