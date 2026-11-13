@@ -1,4 +1,4 @@
-# CarSwap (AI-Devfest)
+# Sayara (AI-Devfest)
 
 A hackathon project. Travellers lend their parked car at the airport, earn credits, and spend the credits on a car where they land.
 
@@ -18,7 +18,7 @@ Your car sits at the airport while you travel. Lend it to someone landing in you
 
 ## 3. How it works
 
-1. **Lend.** Before flying out, the owner lists their car: model, seats, airport, and the dates they are away. They park it, drop a pin on the spot, and leave the key in a CarSwap locker at the airport.
+1. **Lend.** Before flying out, the owner lists their car: model, seats, airport, and the dates they are away. They park it, drop a pin on the spot, and leave the key in a Sayara locker at the airport.
 2. **Earn.** While the owner is away, travellers landing at that airport can borrow the car. Each borrowed day earns the owner 1 credit, paid when the car comes back.
 3. **Spend.** At their destination, the owner searches that airport for cars free on their dates and books one with credits. They get the locker code, find the car by its pin, and drive it.
 4. **Return.** The borrower returns the car before their flight home. The owner gets the credits.
@@ -29,7 +29,7 @@ It is **not** a direct swap. Any number of travellers can use a car one after an
 
 Each submission is scored out of 25, five points per criterion. How well IBM technology is used is also graded.
 
-| Criterion | What judges look for | What it means for CarSwap |
+| Criterion | What judges look for | What it means for Sayara |
 |---|---|---|
 | Completeness and feasibility | A thought-out plan, a working proof of concept, a clear use of **IBM technology** | One demo flow that works every time; IBM AI doing a visible job |
 | Creativity and innovation | An original use of AI on the stated issue; different from what is on the market | The credit system (no cash) and the AI photo check at each handover |
@@ -44,7 +44,7 @@ Status: **proposed, not yet confirmed by the team.**
 - Home airport in the demo: Detroit Metro (DTW).
 - Story: the Motor City invents a new way to use cars. Money that now goes to national rental chains stays with Michigan car owners.
 - Show a number on screen, for example "$412 kept in Michigan this trip", worked out from the parking and rental costs avoided.
-- Known weak spot: the criterion says "value, jobs and opportunity". CarSwap keeps value with residents but creates no jobs, and it takes revenue from airport parking and local rental desks. The pitch needs a rehearsed answer to that.
+- Known weak spot: the criterion says "value, jobs and opportunity". Sayara keeps value with residents but creates no jobs, and it takes revenue from airport parking and local rental desks. The pitch needs a rehearsed answer to that.
 
 ## 6. Rules
 
@@ -125,33 +125,37 @@ returnCar(state, bookingId)                      // marks it returned, pays the 
 
 | Part | Choice | Status |
 |---|---|---|
-| App | Next.js (App Router), TypeScript, Tailwind CSS. One repo, no separate backend | Built |
-| State | The browser's localStorage, behind one module (`lib/store.ts`). No database | Built |
+| App | Next.js (App Router), TypeScript, Tailwind CSS. One repo: the pages and the server routes live together | Built |
+| Accounts | Email and password. Passwords are stored as salted scrypt hashes; the browser holds a random session token in an httpOnly cookie (`lib/server/auth.ts`) | Built |
+| Data | One JSON file on the server, `.data/sayara.json`, plus uploaded photos in `.data/photos/` (`lib/server/db.ts`). Every phone and laptop that opens the site shares it | Built. A file on one machine's disk: fine for one server, not for serverless hosting |
+| Changes | The browser never edits data. It posts an action to `/api/action`; the server checks who is signed in and what they sent, then runs the pure rules (`lib/server/actions.ts`) | Built |
+| Privacy | `/api/state` sends each user only what they may see: a car's pin and spot number only to its owner and to people who booked it, trip photos only to the two people on that trip, nobody else's balance | Built |
 | Booking rules | Pure functions in `lib/rules.ts`, one Vitest test per rule in section 6 | Built |
-| Phone photos | `<input type="file" accept="image/*" capture>`, resized in the browser to 1120 px on the long edge | Built |
-| AI, mock mode | `lib/inspection/mock.ts` returns canned answers so the demo runs with no credentials. This is the default | Built |
+| Phone photos | `<input type="file" accept="image/*" capture>`, shrunk in the browser to 720 px on the long edge before upload | Built |
+| AI, mock mode | `lib/inspection/mock.ts` returns canned answers so the flow runs with no credentials. This is the default, and the only mode where the drawn sample photos are offered | Built |
 | AI, real | IBM watsonx.ai, called only from the server in `lib/inspection/watsonx.ts` | **Not built yet.** The model is not chosen |
-| Server | One route, `app/api/inspect/route.ts`. It is the only place the IBM key may be read | Built (mock only) |
-| Map | A static map image | Not built |
+| Map | Google Maps JavaScript API for the parking pin (`components/ParkingMap.tsx`). The owner drags the map under a fixed pin; the borrower sees the pin and the spot number | Built. Needs `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` |
 
-An earlier plan used a plain HTML and JavaScript app, and before that Google Gemini, Firebase and Google Maps. Both are replaced.
+An earlier plan used a plain HTML and JavaScript app, and before that Google Gemini and Firebase. Both are replaced. The first Next.js build kept everything in the browser's localStorage with two built-in demo users; that is replaced by real accounts and the server-side data file.
 
 ### Run it
 
 ```bash
 npm install
-npm run dev      # http://localhost:3000, mock AI, no credentials needed
-npm test         # booking rules and inspection checks
+npm run dev      # http://localhost:3000, mock AI
+npm test         # booking rules, inspection checks, and who may do and see what
 ```
 
-- **Mock or watsonx:** copy `.env.example` to `.env.local` and set `INSPECTION_PROVIDER=mock` or `watsonx`. `.env.local` is git-ignored. Never prefix these variables with `NEXT_PUBLIC_`, or the key reaches the browser.
-- **Demo on a phone, or in front of judges:** use the production build, `npm run build` then `npm start -- -H 0.0.0.0`, and open `http://<laptop-ip>:3000` on the phone. The dev server refuses to load the app for any host other than `localhost`.
-- **Reset:** the "Reset sample data" link at the bottom of every screen restores the two demo users and two cars.
-- **Sample photos:** drawn placeholders in `public/samples`, made by `node scripts/make-samples.mjs`. To use toy-car photos, replace those 12 files and keep the names (or change the paths in `lib/sampleData.ts`).
+- **Settings:** copy `.env.example` to `.env.local` (git-ignored).
+  - `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`: the Google Maps key. It is meant for the browser, so it is the one variable with the `NEXT_PUBLIC_` prefix. Without it the map loads with Google's "for development purposes only" notice.
+  - `INSPECTION_PROVIDER=mock` or `watsonx`, and the IBM variables. Never give these the `NEXT_PUBLIC_` prefix, or the key reaches the browser.
+- **Two devices, or in front of judges:** use the production build, `npm run build` then `npm start -- -H 0.0.0.0`, and open `http://<laptop-ip>:3000` on the phone. Both see the same cars and trips, because the data is on the laptop. The dev server refuses to load the app for any host other than `localhost`.
+- **Start over:** stop the server and delete the `.data` folder. There are no built-in users or cars: create an account, list a car, then sign in as someone else to borrow it. New accounts start with 7 credits (`STARTING_CREDITS` in `lib/config.ts`).
+- **Sample photos:** drawn placeholders in `public/samples`, made by `node scripts/make-samples.mjs`, offered on the photo steps only while the AI is the mock.
 
 ### How the photo check is wired
 
-1. `components/trip/ReturnStep.tsx` calls `compareInspection(before, after, slot)` from `lib/inspection/client.ts` once per photo slot.
+1. `ReturnCheck` in `components/trip/steps.tsx` calls `compareInspection(before, after, slot)` from `lib/inspection/client.ts` once per photo slot.
 2. That function stitches the pair into one image (`lib/inspection/stitch.ts`: pickup on the left, return on the right, at most 1120 px) and posts it to `/api/inspect`. Stitching needs a canvas, so it happens in the browser. To change how the pair is packed, change `stitch.ts` and the prompt.
 3. The route picks an adapter from `INSPECTION_PROVIDER`. Every adapter has the shape in `lib/inspection/adapter.ts`: one stitched image and a slot in, the model's raw answer out.
 4. `lib/inspection/validate.ts` checks the answer against the JSON shape in section 7. A failed check gives `null`.
@@ -159,19 +163,18 @@ npm test         # booking rules and inspection checks
 
 Two additions to the data model in section 8: the AI result carries `odometer_before_km` next to `odometer_km` (kilometres driven needs both readings, and the stitched image shows both dashboards), and a return inspection stores one AI result per photo slot plus `aiProvider`.
 
-### Who owns what
+### Where things are
 
-Five people can work at once if each stays in their own folder. Ask before editing someone else's.
+| Folder | What is in it |
+|---|---|
+| `app/` | The screens: `page.tsx` (find a car), `trips/`, `lend/`. And the server routes under `app/api/`: `auth`, `state`, `action`, `photo`, `inspect` |
+| `components/` | What the screens are built from: the shell, the welcome and sign-in screen, the map, the photo steps, the return report |
+| `lib/` | The rules and data shapes, shared by browser and server: `rules.ts`, `cars.ts`, `inspections.ts`, `types.ts`, `config.ts` |
+| `lib/server/` | Server only: the data file (`db.ts`), accounts (`auth.ts`), and what each user may do and see (`actions.ts`) |
+| `lib/inspection/` | The photo comparison: stitching, the adapter, validation, verdicts. `watsonx.ts` goes here |
+| `lib/store.ts` | The browser's copy of the data: fetches it, refreshes it every few seconds, sends actions |
 
-| Person | Owns | Job |
-|---|---|---|
-| AI inspection | `lib/inspection/` | Write `watsonx.ts` and the prompt, test on the toy car, tune `validate.ts`, `verdict.ts` and `stitch.ts` |
-| API route | `app/api/inspect/`, `.env.example` | Wire the watsonx adapter in, read the IBM credentials, handle timeouts and errors |
-| Compare UI | `components/compare/` | The return report: side-by-side photos, flags, confidence, confirm or dispute |
-| Booking and data | `lib/rules.ts`, `lib/store.ts`, `lib/inspections.ts`, `lib/sampleData.ts`, `components/booking/`, `components/trip/`, `app/page.tsx`, `app/trip/` | Search, booking, photo capture, sample data. Section 6 rules stay as written |
-| Pitch assets | `public/samples/`, `lib/config.ts`, `docs/` | Toy-car photos, the impact estimate and its wording, slides, the backup video |
-
-Shared by everyone, so change with care: `lib/types.ts`, `components/ui.ts`, `app/globals.css`, `components/shell/`.
+Shared by everyone, so change with care: `lib/types.ts`, `lib/config.ts`, `app/globals.css`, `components/ui.tsx`.
 
 ## 10. The demo (3 minutes)
 

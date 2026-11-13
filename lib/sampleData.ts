@@ -15,6 +15,8 @@ export const SAMPLE_STATE: State = {
       seats: 5,
       from: "2026-12-18",
       to: "2026-12-30",
+      pin: { lat: 42.2068, lng: -83.3555 },
+      spot: "B-214",
     },
     {
       id: "car-b",
@@ -24,6 +26,8 @@ export const SAMPLE_STATE: State = {
       seats: 5,
       from: "2026-12-20",
       to: "2026-12-27",
+      pin: { lat: 43.6831, lng: -79.6135 },
+      spot: "C-108",
     },
   ],
   bookings: [],

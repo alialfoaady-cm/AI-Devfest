@@ -23,7 +23,15 @@ export type Car = {
   seats: number;
   from: string;
   to: string;
+  /** Where the owner left it, dropped on the map. */
+  pin?: Pin;
+  /** A picture of the car for its listing: a data URL from the camera, or a path under /public. */
+  photo?: string;
+  /** The painted bay number, as the owner typed it. */
+  spot?: string;
 };
+
+export type Pin = { lat: number; lng: number };
 
 export type Booking = {
   id: string;

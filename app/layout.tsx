@@ -1,36 +1,37 @@
 import type { Metadata, Viewport } from "next";
-import { Barlow, Barlow_Condensed } from "next/font/google";
-import { Shell } from "@/components/shell/Shell";
+import { Host_Grotesk } from "next/font/google";
+import { AppShell } from "@/components/AppShell";
 import "./globals.css";
 
-// Barlow is drawn from highway signs and licence plates, which is the world this app lives in.
-const barlow = Barlow({
-  variable: "--font-barlow",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-});
-
-const barlowCondensed = Barlow_Condensed({
-  variable: "--font-barlow-condensed",
-  subsets: ["latin"],
-  weight: ["600", "700"],
-});
+const host = Host_Grotesk({ variable: "--font-host", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CarSwap",
+  title: "Sayara",
   description: "Lend your parked car at the airport, earn credits, spend them on a car where you land.",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
 };
+
+// Runs before the page paints, so the right theme is there from the first frame:
+// the person's saved choice, or else what their device asks for. Kept in step by components/theme.ts.
+const THEME_SCRIPT = `try{var t=localStorage.getItem("sayara-theme");document.documentElement.dataset.theme=t==="light"||t==="dark"?t:matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}catch(e){}`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${barlow.variable} ${barlowCondensed.variable} antialiased`}>
+    // The script above sets data-theme before React loads, which React would otherwise report as a mismatch.
+    <html lang="en" className={`${host.variable} antialiased`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body>
-        <Shell>{children}</Shell>
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

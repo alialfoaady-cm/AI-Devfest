@@ -42,3 +42,6 @@ next-env.d.ts
 
 # keep the example env file in git
 !.env.example
+
+# the server's data file and uploaded photos
+.data/
