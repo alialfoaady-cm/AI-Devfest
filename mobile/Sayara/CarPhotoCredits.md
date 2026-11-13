@@ -49,6 +49,12 @@ All from Wikimedia Commons, resized to 1024 px. Not photos of the listed cars. E
 | clean-starex | [Hyundai Grand Starex (BDJ-320) Front.jpg](https://commons.wikimedia.org/wiki/File:Hyundai_Grand_Starex_(BDJ-320)_Front.jpg) | Captainmorlypogi1959 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
 | clean-astra | [1990 Vauxhall Astra Belmont LXi estate (16147301670).jpg](https://commons.wikimedia.org/wiki/File:1990_Vauxhall_Astra_Belmont_LXi_estate_(16147301670).jpg) | Charlie from United Kingdom | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0) |
 | clean-xsara | [2001 Citroen Xsara L 8V in Silver, Front left, 05-10-23.png](https://commons.wikimedia.org/wiki/File:2001_Citroen_Xsara_L_8V_in_Silver,_Front_left,_05-10-23.png) | PlasticBodyPanels | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0) |
+| clean-hhr / damage-hhr | [2007 Chevrolet HHR 2.4 LT front.jpg](https://commons.wikimedia.org/wiki/File:2007_Chevrolet_HHR_2.4_LT_front.jpg) / [2007 Chevrolet HHR involved in crash.jpg](https://commons.wikimedia.org/wiki/File:2007_Chevrolet_HHR_involved_in_crash.jpg) | Sjoerd95 / Crazytales | CC BY-SA 3.0 / CC0 |
+| clean-roomster / damage-roomster | [2008 Skoda Roomster front.jpg](https://commons.wikimedia.org/wiki/File:2008_Skoda_Roomster_front.jpg) / [Škoda Roomster Blue Dented.jpg](https://commons.wikimedia.org/wiki/File:%C5%A0koda_Roomster_Blue_Dented.jpg) | LuvsMG481 / AVDLCZ | CC BY-SA 4.0 / CC0 |
+| clean-slk / damage-slk | [2007 Mercedes-Benz SLK 280, front right, 09-09-2023.jpg](https://commons.wikimedia.org/wiki/File:2007_Mercedes-Benz_SLK_280,_front_right,_09-09-2023.jpg) / [Front crashed SLK.jpg](https://commons.wikimedia.org/wiki/File:Front_crashed_SLK.jpg) | MercurySable99 / Matti Blume | CC BY-SA 4.0 / CC BY-SA 3.0 |
+| clean-w211 / damage-w211 | [Mercedes W211 front 20080127.jpg](https://commons.wikimedia.org/wiki/File:Mercedes_W211_front_20080127.jpg) / [Crashed black W211.jpg](https://commons.wikimedia.org/wiki/File:Crashed_black_W211.jpg) | Rudolf Stricker / Matti Blume | CC BY-SA 3.0 |
+
+DemoPhotos also has a 1994 Ford Mustang GT pair (not in the app): [front left](https://commons.wikimedia.org/wiki/File:1994_Ford_Mustang_GT_convertible,_front_left,_08-06-2023.jpg) by MercurySable99 and [front-end damage](https://commons.wikimedia.org/wiki/File:1994_Ford_Mustang_GT_front-end_damage_2017-07-01.jpg) by Josh Baumgartner, both CC BY-SA 4.0.
 
 ## Damage model (Sayara/Inspection/DamageDetector.mlpackage)
 

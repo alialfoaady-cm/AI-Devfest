@@ -105,18 +105,45 @@ private struct SampleCarArt: View {
 /// both sides: the damage was already there at pickup, so nothing new should be reported. The dashboard keeps
 /// the drawn odometer photos so the odometer reading can be tested.
 enum RealTestPhotos {
-    /// slot -> (pickup asset, return asset)
-    static let pairs: [Slot: (pickup: String, return: String)] = [
-        .front: ("clean-altima", "damage-altima"),          // Nissan Altima 2007-08, white
-        .back: ("clean-starex", "damage-starex"),           // Hyundai Starex van
-        .left: ("clean-astra", "damage-astra"),             // Vauxhall Astra estate
-        .right: ("clean-xsara", "damage-esbjerg"),          // Citroen Xsara, silver
-        .interior: ("damage-bmw-mirror", "damage-bmw-mirror"),
+    typealias Set = [Slot: (pickup: String, return: String)]
+
+    /// slot -> (pickup asset, return asset). Each tap of "Use real test photos" at pickup moves to the next set;
+    /// the return step then uses the same set as that trip's pickup.
+    static let sets: [Set] = [
+        [
+            .front: ("clean-altima", "damage-altima"),        // Nissan Altima 2007-08, white
+            .back: ("clean-starex", "damage-starex"),         // Hyundai Starex van
+            .left: ("clean-astra", "damage-astra"),           // Vauxhall Astra estate
+            .right: ("clean-xsara", "damage-esbjerg"),        // Citroen Xsara, silver
+            .interior: ("damage-bmw-mirror", "damage-bmw-mirror"),
+        ],
+        [
+            .front: ("clean-hhr", "damage-hhr"),              // Chevrolet HHR, silver
+            .back: ("clean-roomster", "damage-roomster"),     // Skoda Roomster, blue
+            .left: ("clean-slk", "damage-slk"),               // Mercedes SLK, silver
+            .right: ("clean-w211", "damage-w211"),            // Mercedes E-Class W211, black
+            .interior: ("damage-bmw-mirror", "damage-bmw-mirror"),
+        ],
     ]
 
-    static func make(_ phase: InspectionPhase) throws -> [Slot: String] {
+    private static let lastKey = "realTestSet.last"
+    private static func key(_ bookingId: String) -> String { "realTestSet.\(bookingId)" }
+
+    /// Which set this trip uses: a new one at each pickup tap, the trip's own at return.
+    static func setIndex(for phase: InspectionPhase, bookingId: String) -> Int {
+        let defaults = UserDefaults.standard
+        if phase == .pickup {
+            let next = defaults.object(forKey: lastKey) == nil ? 0 : (defaults.integer(forKey: lastKey) + 1) % sets.count
+            defaults.set(next, forKey: lastKey)
+            defaults.set(next, forKey: key(bookingId))
+            return next
+        }
+        return min(defaults.integer(forKey: key(bookingId)), sets.count - 1)
+    }
+
+    static func make(_ phase: InspectionPhase, bookingId: String) throws -> [Slot: String] {
         var photos = try SamplePhotos.make(phase)   // dashboard (and a fallback for anything missing)
-        for (slot, pair) in pairs {
+        for (slot, pair) in sets[setIndex(for: phase, bookingId: bookingId)] {
             let name = phase == .pickup ? pair.pickup : pair.return
             guard let image = UIImage(named: name) else { throw RuleError("Missing test photo \(name).") }
             photos[slot] = try PhotoStore.save(flatten(image))

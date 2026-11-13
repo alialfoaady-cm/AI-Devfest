@@ -207,7 +207,7 @@ struct TripDetailView: View {
 
     private func useSamples(_ phase: InspectionPhase, real: Bool = false) {
         do {
-            let photos = try (real ? RealTestPhotos.make(phase) : SamplePhotos.make(phase))
+            let photos = try (real ? RealTestPhotos.make(phase, bookingId: bookingId) : SamplePhotos.make(phase))
             if phase == .pickup { pickupPhotos = photos } else { returnPhotos = photos }
         } catch {
             self.error = error.localizedDescription
