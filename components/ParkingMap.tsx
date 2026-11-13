@@ -145,7 +145,7 @@ export function ParkingMap({
   }, [center]);
 
   return (
-    <div className={`relative isolate overflow-hidden rounded-xl border border-line bg-surface ${className}`}>
+    <div className={`relative isolate overflow-hidden rounded-2xl border border-line bg-surface ${className}`}>
       <div
         ref={element}
         className={`absolute inset-0 ${still ? "bg-[repeating-linear-gradient(90deg,transparent_0_38px,var(--line)_38px_39px),repeating-linear-gradient(0deg,transparent_0_38px,var(--line)_38px_39px)]" : ""}`}

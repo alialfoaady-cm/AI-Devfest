@@ -21,7 +21,7 @@ export const viewport: Viewport = {
 
 // Runs before the page paints, so the right theme is there from the first frame:
 // the person's saved choice, or else what their device asks for. Kept in step by components/theme.ts.
-const THEME_SCRIPT = `try{var t=localStorage.getItem("sayara-theme");document.documentElement.dataset.theme=t==="light"||t==="dark"?t:matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}catch(e){}`;
+const THEME_SCRIPT = `try{var t=localStorage.getItem("sayara-theme");document.documentElement.dataset.theme=t==="light"?t:"dark"}catch(e){}`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

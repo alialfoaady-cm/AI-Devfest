@@ -3,10 +3,11 @@
 import { Key, MapPin, Plus } from "@phosphor-icons/react";
 import Link from "next/link";
 import { ParkingMap } from "@/components/ParkingMap";
-import { CarPhoto, Empty, Initial, Notice, Pill, btnPrimary, btnQuiet, btnStrong, card, pageTitle } from "@/components/ui";
-import { AIRPORTS } from "@/lib/config";
+import { CarPhoto, Empty, Initial, Notice, Pill, btnPrimary, btnQuiet, card, cardTitle, pageTitle } from "@/components/ui";
+import { AIRPORTS, CREDITS_PER_DAY } from "@/lib/config";
 import { shortDate } from "@/lib/format";
 import { tripStage } from "@/lib/inspections";
+import { tripCost } from "@/lib/rules";
 import { useStore } from "@/lib/store";
 
 export default function LendPage() {
@@ -20,10 +21,10 @@ export default function LendPage() {
           <h1 id="lend-heading" className={pageTitle}>
             Lend my car
           </h1>
-          <p className="mt-2 text-ink-soft">One credit for every day someone borrows it, paid when it comes back.</p>
+          <p className="mt-2 text-ink-soft">{CREDITS_PER_DAY} credits for every day someone borrows it, plus 1 for each mile past {CREDITS_PER_DAY} a day. Paid when it comes back.</p>
         </div>
         {cars.length > 0 && (
-          <Link href="/lend/new" className={btnStrong}>
+          <Link href="/lend/new" className={btnQuiet}>
             <Plus size={20} weight="bold" aria-hidden />
             List a car
           </Link>
@@ -63,7 +64,7 @@ export default function LendPage() {
                 )}
               </div>
               <div className="p-4">
-                <h2 className="text-lg font-bold leading-tight tracking-tight">{car.model}</h2>
+                <h2 className={cardTitle}>{car.model}</h2>
                 <p className="mt-1 text-ink-soft">
                   {AIRPORTS[car.airport]}. Free from {shortDate(car.from)} until you land on {shortDate(car.to)}.
                 </p>
@@ -93,7 +94,11 @@ export default function LendPage() {
                               , {shortDate(loan.from)} to {shortDate(loan.to)}
                             </span>
                           </p>
-                          <Pill tone={returned ? "soft" : "quiet"}>{returned ? `Earned ${loan.days}` : `Earns ${loan.days}`}</Pill>
+                          <Pill tone={returned ? "soft" : "quiet"}>{loan.status === "cancelled"
+                              ? "Cancelled"
+                              : returned
+                                ? `Earned ${tripCost(loan.days) + (loan.mileage?.credits ?? 0)}`
+                                : `Earns ${tripCost(loan.days)}`}</Pill>
                         </div>
                         {returned && (
                           <Link href={`/trips/${loan.id}`} className={`${btnQuiet} mt-3 w-full`}>

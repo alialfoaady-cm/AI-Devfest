@@ -75,7 +75,7 @@ describe("photo check and credits", () => {
   });
   it("pays the owner on return, and the owner's decision moves no credits", () => {
     const returned = saveReturn(savePickup(booked, id, SAMPLE_PICKUP_PHOTOS), id, SAMPLE_RETURN_PHOTOS, noResults, "mock");
-    expect(credits(returned, "user-a")).toBe(9);
+    expect(credits(returned, "user-a")).toBe(70 + 245);
     const decided = decideFinding(returned, `${id}-return`, "back:0", "confirmed");
     expect(decided.inspections[1].ownerDecision).toEqual({ "back:0": "confirmed" });
     expect(decided.users).toEqual(returned.users);

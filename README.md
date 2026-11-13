@@ -19,7 +19,7 @@ Your car sits at the airport while you travel. Lend it to someone landing in you
 ## 3. How it works
 
 1. **Lend.** Before flying out, the owner lists their car: model, seats, airport, and the dates they are away. They park it, drop a pin on the spot, and leave the key in a Sayara locker at the airport.
-2. **Earn.** While the owner is away, travellers landing at that airport can borrow the car. Each borrowed day earns the owner 1 credit, paid when the car comes back.
+2. **Earn.** While the owner is away, travellers landing at that airport can borrow the car. Each borrowed day earns the owner 35 credits (1 credit = 1 mile, and a day includes 35), paid when the car comes back.
 3. **Spend.** At their destination, the owner searches that airport for cars free on their dates and books one with credits. They get the locker code, find the car by its pin, and drive it.
 4. **Return.** The borrower returns the car before their flight home. The owner gets the credits.
 
@@ -50,7 +50,7 @@ Status: **proposed, not yet confirmed by the team.**
 
 These are the booking rules. Treat them as fixed.
 
-- 1 credit = 1 day. A trip from Dec 20 to Dec 27 is 7 days and costs 7 credits.
+- 1 credit = 1 mile. A day includes 35 miles, so a day costs 35 credits. A trip from Dec 20 to Dec 27 is 7 days: 245 credits, with 245 miles included. (The first version charged 1 credit per day; the iPhone app on the `app` branch still does.)
 - A car shows up in a search only if it is at the chosen airport, is not the searcher's own car, and its free window covers the whole trip.
 - **The owner's return date is a hard cutoff.** Nobody can book past the date the owner lands.
 - Two bookings on the same car cannot overlap. Back-to-back is allowed: one person returns on Dec 27 and the next picks up on Dec 27.
@@ -58,8 +58,11 @@ These are the booking rules. Treat them as fixed.
 - The owner earns the credits **when the car is returned**, not when it is booked.
 - A returned booking cannot be returned a second time.
 - A trip must be at least 1 day.
+- Any price can be paid in credits, in dollars, or part in each: 1 credit = $1.50. Credits are used first and dollars cover the rest. There is no payment provider yet, so the dollar part is recorded and nothing is charged. The owner is always paid in credits.
+- Insurance is bought per trip, before pickup, on the Insurance tab: 10 credits a day ($15). With it, Sayara pays for damage the owner confirms. Without it, the borrower pays. It records who is responsible; no repair money moves in the app.
+- Either person on a trip can cancel it before pickup. The borrower gets their payment back. Whoever cancels pays the other person's parking for the trip's days (estimated at $20 a day, paid to them in credits) plus a 15% cut for Sayara. A cancelled trip frees the car's dates. By the team's choice the app shows this fee only in the cancel window, not on listings or at booking.
 - Planned, not built: a late return costs the borrower extra credits.
-- Planned, not built: charge credits by kilometres driven as well as by days, to cover wear.
+- Each mile past a trip's total costs 1 more credit. It moves from the borrower to the owner when the car is returned, and can take the borrower below zero. The miles come from the two dashboard photos; if the odometer cannot be read there is no charge. `mileageCharge` in `lib/rules.ts` takes a different rate as its third argument, for a rate worked out per car.
 
 ## 7. Features, in build order
 
@@ -127,6 +130,7 @@ returnCar(state, bookingId)                      // marks it returned, pays the 
 |---|---|---|
 | App | Next.js (App Router), TypeScript, Tailwind CSS. One repo: the pages and the server routes live together | Built |
 | Accounts | Email and password. Passwords are stored as salted scrypt hashes; the browser holds a random session token in an httpOnly cookie (`lib/server/auth.ts`) | Built |
+| Browsing | Anyone can open Find a car without an account and see the cars, their photos and the days they are free. Booking, lending and trips need an account. A visitor is never sent a parking spot, a trip photo or anyone's name beyond an owner's first name (`viewFor` in `lib/server/actions.ts`) | Built |
 | Data | One JSON file on the server, `.data/sayara.json`, plus uploaded photos in `.data/photos/` (`lib/server/db.ts`). Every phone and laptop that opens the site shares it | Built. A file on one machine's disk: fine for one server, not for serverless hosting |
 | Changes | The browser never edits data. It posts an action to `/api/action`; the server checks who is signed in and what they sent, then runs the pure rules (`lib/server/actions.ts`) | Built |
 | Privacy | `/api/state` sends each user only what they may see: a car's pin and spot number only to its owner and to people who booked it, trip photos only to the two people on that trip, nobody else's balance | Built |
@@ -150,7 +154,7 @@ npm test         # booking rules, inspection checks, and who may do and see what
   - `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`: the Google Maps key. It is meant for the browser, so it is the one variable with the `NEXT_PUBLIC_` prefix. Without it the map loads with Google's "for development purposes only" notice.
   - `INSPECTION_PROVIDER=mock` or `watsonx`, and the IBM variables. Never give these the `NEXT_PUBLIC_` prefix, or the key reaches the browser.
 - **Two devices, or in front of judges:** use the production build, `npm run build` then `npm start -- -H 0.0.0.0`, and open `http://<laptop-ip>:3000` on the phone. Both see the same cars and trips, because the data is on the laptop. The dev server refuses to load the app for any host other than `localhost`.
-- **Start over:** stop the server and delete the `.data` folder. There are no built-in users or cars: create an account, list a car, then sign in as someone else to borrow it. New accounts start with 7 credits (`STARTING_CREDITS` in `lib/config.ts`).
+- **Start over:** stop the server and delete the `.data` folder. A new data file starts with 50 demo listings at 8 US airports (`lib/seed/listings.json`, photos in `public/cars/`, credits in `public/cars/CREDITS.md`); their made-up owners have no accounts. Create an account to borrow one, or list your own car and sign in as someone else to borrow it. New accounts start with 245 credits, a first week (`STARTING_CREDITS` in `lib/config.ts`).
 - **Sample photos:** drawn placeholders in `public/samples`, made by `node scripts/make-samples.mjs`, offered on the photo steps only while the AI is the mock.
 
 ### How the photo check is wired
@@ -168,7 +172,7 @@ Two additions to the data model in section 8: the AI result carries `odometer_be
 | Folder | What is in it |
 |---|---|
 | `app/` | The screens: `page.tsx` (find a car), `trips/`, `lend/`. And the server routes under `app/api/`: `auth`, `state`, `action`, `photo`, `inspect` |
-| `components/` | What the screens are built from: the shell, the welcome and sign-in screen, the map, the photo steps, the return report |
+| `components/` | What the screens are built from: the shell, the sign-in window, the search bar and dropdown, the map, the photo steps, the return report |
 | `lib/` | The rules and data shapes, shared by browser and server: `rules.ts`, `cars.ts`, `inspections.ts`, `types.ts`, `config.ts` |
 | `lib/server/` | Server only: the data file (`db.ts`), accounts (`auth.ts`), and what each user may do and see (`actions.ts`) |
 | `lib/inspection/` | The photo comparison: stitching, the adapter, validation, verdicts. `watsonx.ts` goes here |
@@ -183,7 +187,7 @@ Use a **toy car** for the photos. Add the "damage" with washable marker or a sti
 1. **Hook (15 s):** "Airport parking costs $150 a week. A rental costs $400. Your car is sitting in a lot doing nothing."
 2. **Lend:** user B lists a car at their home airport.
 3. **Earn:** user A's car sits at DTW. User B lands in Detroit, books it for 7 days, does the photo check-in, and the locker code unlocks.
-4. **Return:** user B does the photo check-out on the toy car with fresh marker "damage". The AI spots the scratch. User A's credits go up by 7.
+4. **Return:** user B does the photo check-out on the toy car with fresh marker "damage". The AI spots the scratch. User A's credits go up by 245, plus 1 for each mile past the 245 included.
 5. **Spend:** user A lands at user B's airport, searches, and books a car with those credits.
 6. **Close:** "No money changed hands. Two cars got used instead of sitting in a lot, and the savings stayed in Michigan."
 

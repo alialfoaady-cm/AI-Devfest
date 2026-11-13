@@ -1,6 +1,6 @@
 "use client";
 // The browser's copy of the data. The server owns the real thing (lib/server); this module fetches
-// the part the signed-in user may see, keeps it fresh, and sends every change as an action.
+// the part this person may see (signed in or just browsing), keeps it fresh, and sends every change as an action.
 
 import { useState, useSyncExternalStore } from "react";
 import type { State } from "./types";
@@ -91,7 +91,7 @@ export async function signIn(fields: { mode: "signup" | "signin"; name?: string;
 export async function signOut() {
   await post("/api/auth", "DELETE");
   lastAnswer = "";
-  set({ ready: true, currentUserId: null, state: EMPTY });
+  await refresh();
 }
 
 /** For a button that changes something: runs the work, and tracks "busy" and the error to show. */

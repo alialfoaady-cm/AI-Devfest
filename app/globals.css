@@ -1,47 +1,46 @@
 @import "tailwindcss";
 
-/* Sayara. Black and white like the companies it competes with, plus one vivid green.
-   Light and dark share every class: only the values below change. The theme is the
-   device's, unless the person picked one with the button in the top bar (data-theme on <html>,
-   set before first paint by the script in app/layout.tsx).
+/* Sayara. The dark theme is the iPhone app's (mobile/Sayara/Sayara/Theme/Theme.swift on the
+   app branch): black page, grey cards one step up, fields one step further, one green.
+   Light is the same ramp turned over. Both share every class: only the values below change.
+   Dark is the default, as on the phone; the button in the top bar switches (data-theme on
+   <html>, set before first paint by the script in app/layout.tsx).
 
-   Shape rule, used everywhere: buttons and inputs 8px, cards and maps 12px (rounded-xl),
-   chips and the theme button full pills. Flat: lines and fills, no drop shadows. */
+   Shape rule, as in the iPhone app: cards, maps and photos 16px (rounded-2xl), buttons 14px,
+   fields and tiles inside a card 12px (rounded-xl), chips full pills. Flat: lines and fills. */
 :root {
   --canvas: #ffffff; /* page */
-  --surface: #f5f5f5; /* fields, quiet panels */
-  --surface-2: #ebebeb; /* hover, selected */
-  --ink: #0a0a0a; /* text, and the strong button */
-  --ink-soft: #5c5c5c;
-  --line: #e4e4e4;
-  --green: #17d164; /* the action colour and the map pin; text on it is always --on-green */
-  --green-press: #12b855;
-  --green-ink: #067a37; /* green as text on the page */
-  --green-soft: #e2f9ea; /* green as a quiet fill */
-  --on-green: #04180c;
-  --amber: #a15c00;
-  --amber-soft: #fdf0d5;
+  --surface: #f5f5f6; /* cards */
+  --surface-2: #e9e9eb; /* fields, and tiles inside a card */
+  --ink: #0a0a0a;
+  --ink-soft: #5f5f63;
+  --line: #dededf;
+  --green: #2ee066; /* the action colour and the map pin; text on it is always --on-green */
+  --green-press: #25c958;
+  --green-ink: #0a7a35; /* green as text and icons on the page */
+  --on-green: #000000;
+  --amber: #8a5300;
   --red: #c4281c;
-  --red-soft: #fde7e4;
+  /* Quiet fills are the colour itself at low strength, as in the iPhone app. */
+  --green-soft: color-mix(in srgb, var(--green-ink) 14%, transparent);
+  --amber-soft: color-mix(in srgb, var(--amber) 15%, transparent);
+  --red-soft: color-mix(in srgb, var(--red) 12%, transparent);
   color-scheme: light;
 }
 
 :root[data-theme="dark"] {
   --canvas: #000000;
-  --surface: #161616;
-  --surface-2: #242424;
+  --surface: #141414;
+  --surface-2: #212121;
   --ink: #ffffff;
-  --ink-soft: #a8a8a8;
-  --line: #2c2c2c;
-  --green: #1fdc6c;
-  --green-press: #4be88b;
-  --green-ink: #3fe585;
-  --green-soft: #0c2a18;
-  --on-green: #04180c;
-  --amber: #f5b84d;
-  --amber-soft: #33270d;
-  --red: #ff7b6e;
-  --red-soft: #3a1714;
+  --ink-soft: #9e9e9e;
+  --line: #333333;
+  --green: #2ee066;
+  --green-press: #5be885;
+  --green-ink: #2ee066;
+  --on-green: #000000;
+  --amber: #ffc747;
+  --red: #ff6b5c;
   color-scheme: dark;
 }
 

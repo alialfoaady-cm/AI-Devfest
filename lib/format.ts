@@ -16,3 +16,10 @@ export function isoDay(offset = 0): string {
 }
 
 export const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
+
+/** 367.5 -> "$367.50" */
+export const usd = (amount: number) => `$${amount.toFixed(2)}`;
+
+/** "245 credits", "$367.50", or "100 credits + $217.50". */
+export const payText = (paid: { credits: number; usd: number }) =>
+  [paid.credits > 0 || paid.usd === 0 ? plural(paid.credits, "credit") : "", paid.usd > 0 ? usd(paid.usd) : ""].filter(Boolean).join(" + ");

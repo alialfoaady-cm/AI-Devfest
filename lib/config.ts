@@ -9,8 +9,32 @@ export const RENTAL_COST_PER_DAY_USD_ESTIMATE = 57;
 /** Shown next to the impact figure so nobody reads the estimate as a fact. */
 export const IMPACT_LABEL = "rental cost avoided (estimate)";
 
-/** What a new account starts with: enough to borrow a car for a first week before lending one. */
-export const STARTING_CREDITS = 7;
+/**
+ * Credits are miles: one credit pays for one mile. A day of a trip includes 35 miles, so a day
+ * costs 35 credits, and every mile past a trip's total costs one more.
+ * A rate worked out per car (the IBM part) is passed to mileageCharge in lib/rules.ts instead.
+ */
+export const MILES_INCLUDED_PER_DAY = 35;
+export const CREDITS_PER_EXTRA_MILE = 1;
+export const CREDITS_PER_DAY = MILES_INCLUDED_PER_DAY * CREDITS_PER_EXTRA_MILE;
+
+/** What a credit costs in money. Any price can be paid in credits, in dollars, or part in each. */
+export const USD_PER_CREDIT = 1.5;
+
+/** Cover for a trip: with it Sayara pays for damage the owner confirms, without it the borrower does. */
+export const INSURANCE_CREDITS_PER_DAY = 10;
+
+/** A day of airport parking, in dollars. An estimate: real rates differ by airport and by lot. */
+export const PARKING_FEE_PER_DAY_USD_ESTIMATE = 20;
+
+/** Sayara's share when a trip is cancelled, on top of the other person's parking fees. */
+export const CANCELLATION_CUT = 0.15;
+
+/** The dashboard reading is stored in kilometres. */
+export const KM_PER_MILE = 1.609344;
+
+/** What a new account starts with: a first week away, before lending a car. */
+export const STARTING_CREDITS = 7 * CREDITS_PER_DAY;
 
 /** A finding below this confidence is shown as "unsure", never as damage. */
 export const MIN_DAMAGE_CONFIDENCE = 0.6;
@@ -25,15 +49,30 @@ export const MAX_IMAGE_EDGE_PX = 1120;
  */
 export const STORED_PHOTO_EDGE_PX = 720;
 
-/** Where the map opens before an owner has dropped a pin: the parking garage Google Maps lists
- * for the McNamara terminal (DTW) and for Terminal 1 (YYZ), looked up on 2026-11-13. */
+/** Where the map opens before an owner has dropped a pin: each airport's main terminal garage.
+ * Looked up on 2026-11-13 (airport parking pages and OpenStreetMap); YYZ is Terminal 1's garage. */
 export const AIRPORT_PARKING: Record<string, { lat: number; lng: number }> = {
-  DTW: { lat: 42.2068, lng: -83.3555 },
+  DTW: { lat: 42.2068, lng: -83.3555 }, // McNamara Garage
+  ORD: { lat: 41.9783, lng: -87.9034 }, // Main Garage, Terminals 1-3
+  ATL: { lat: 33.6391, lng: -84.4481 }, // South Parking Deck, Domestic Terminal (approximate)
+  DEN: { lat: 39.8489, lng: -104.6765 }, // West Garage
+  LAX: { lat: 33.9443, lng: -118.4072 }, // Parking Structure 3
+  MCO: { lat: 28.4333, lng: -81.3083 }, // Parking Garage A
+  SEA: { lat: 47.4433, lng: -122.2992 }, // SEA Airport Parking Garage
+  JFK: { lat: 40.6456, lng: -73.7813 }, // Terminal 4 Blue Garage
   YYZ: { lat: 43.6831, lng: -79.6135 },
 };
 
+/** Every airport with cars. The demo listings in lib/seed/listings.json use the US ones. */
 export const AIRPORTS: Record<string, string> = {
   DTW: "Detroit Metro",
+  ORD: "Chicago O'Hare",
+  ATL: "Atlanta Hartsfield-Jackson",
+  DEN: "Denver International",
+  LAX: "Los Angeles International",
+  MCO: "Orlando International",
+  SEA: "Seattle-Tacoma",
+  JFK: "New York JFK",
   YYZ: "Toronto Pearson",
 };
 

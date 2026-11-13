@@ -6,6 +6,7 @@
 import { randomBytes } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
+import seed from "../seed/listings.json";
 import type { State } from "../types";
 
 export type Account = { userId: string; email: string; salt: string; hash: string };
@@ -21,7 +22,12 @@ const FILE = path.join(DATA_DIR, "sayara.json");
 const PHOTO_DIR = path.join(DATA_DIR, "photos");
 const MAX_PHOTO_BYTES = 2_000_000;
 
-const empty = (): Db => ({ state: { users: [], cars: [], bookings: [], inspections: [] }, accounts: [], sessions: {} });
+// A new data file starts with the demo listings in lib/seed/listings.json (owners have no accounts).
+const empty = (): Db => ({
+  state: { users: structuredClone(seed.users), cars: structuredClone(seed.cars), bookings: [], inspections: [] },
+  accounts: [],
+  sessions: {},
+});
 
 export async function readDb(): Promise<Db> {
   try {

@@ -2,15 +2,17 @@
 
 import { Path } from "@phosphor-icons/react";
 import Link from "next/link";
-import { CarPhoto, Empty, Pill, btnPrimary, btnQuiet, carGrid, carPhoto, cardTitle, pageTitle } from "@/components/ui";
+import { CarPhoto, Empty, Pill, btnPrimary, btnQuiet, carCard, carGrid, cardTitle, pageTitle } from "@/components/ui";
 import { plural, shortDate } from "@/lib/format";
 import { tripStage } from "@/lib/inspections";
+import { tripCost } from "@/lib/rules";
 import { useStore } from "@/lib/store";
 
 const STAGE = {
   pickup: { pill: "Ready to pick up", tone: "green", action: "Find the car" },
   driving: { pill: "On the road", tone: "soft", action: "Return the car" },
   returned: { pill: "Returned", tone: "quiet", action: "See return report" },
+  cancelled: { pill: "Cancelled", tone: "quiet", action: "See what happened" },
 } as const;
 
 export default function TripsPage() {
@@ -34,7 +36,7 @@ export default function TripsPage() {
               </Link>
             }
           >
-            Cars you borrow show up here, from pickup to return. Each day costs one credit.
+            Cars you borrow show up here, from pickup to return. One credit is one mile, and a day includes 35.
           </Empty>
         </div>
       ) : (
@@ -43,15 +45,16 @@ export default function TripsPage() {
             const car = state.cars.find((c) => c.id === trip.carId);
             const stage = STAGE[tripStage(state, trip.id)];
             return (
-              <li key={trip.id} className="flex flex-col">
-                <CarPhoto photo={car?.photo} model={car?.model ?? "Car"} className={carPhoto} />
-                <div className="flex flex-1 flex-col items-start px-2 pt-3">
+              <li key={trip.id} className={carCard}>
+                <CarPhoto photo={car?.photo} model={car?.model ?? "Car"} className="aspect-[3/2] w-full" />
+                <div className="flex flex-1 flex-col items-start p-4">
                   <Pill tone={stage.tone}>{stage.pill}</Pill>
                   <h2 className={`${cardTitle} mt-2`}>
                     {car?.model} at {car?.airport}
                   </h2>
-                  <p className="text-sm text-ink-soft">
-                    {shortDate(trip.from)} to {shortDate(trip.to)}, {plural(trip.days, "credit")}
+                  <p className="mt-0.5 text-ink-soft">
+                    {shortDate(trip.from)} to {shortDate(trip.to)}
+                    {trip.status !== "cancelled" && `, ${plural(tripCost(trip.days) + (trip.mileage?.credits ?? 0), "credit")}`}
                   </p>
                   <Link href={`/trips/${trip.id}`} className={`${stage.tone === "quiet" ? btnQuiet : btnPrimary} mt-4 w-full`}>
                     {stage.action}

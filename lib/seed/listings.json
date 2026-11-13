@@ -1,0 +1,1006 @@
+{
+  "users": [
+    {
+      "id": "seed-dtw-1",
+      "name": "Marisol R.",
+      "credits": 245
+    },
+    {
+      "id": "seed-dtw-2",
+      "name": "Devon K.",
+      "credits": 245
+    },
+    {
+      "id": "seed-dtw-3",
+      "name": "Priya S.",
+      "credits": 245
+    },
+    {
+      "id": "seed-dtw-4",
+      "name": "Tomasz W.",
+      "credits": 245
+    },
+    {
+      "id": "seed-dtw-5",
+      "name": "Aaliyah J.",
+      "credits": 245
+    },
+    {
+      "id": "seed-dtw-6",
+      "name": "Hector M.",
+      "credits": 245
+    },
+    {
+      "id": "seed-dtw-7",
+      "name": "Noor A.",
+      "credits": 245
+    },
+    {
+      "id": "seed-dtw-8",
+      "name": "Grant L.",
+      "credits": 245
+    },
+    {
+      "id": "seed-ord-1",
+      "name": "Kateryna B.",
+      "credits": 245
+    },
+    {
+      "id": "seed-ord-2",
+      "name": "Malik T.",
+      "credits": 245
+    },
+    {
+      "id": "seed-ord-3",
+      "name": "Yuki H.",
+      "credits": 245
+    },
+    {
+      "id": "seed-ord-4",
+      "name": "Brendan O.",
+      "credits": 245
+    },
+    {
+      "id": "seed-ord-5",
+      "name": "Lucia F.",
+      "credits": 245
+    },
+    {
+      "id": "seed-ord-6",
+      "name": "Darnell P.",
+      "credits": 245
+    },
+    {
+      "id": "seed-atl-1",
+      "name": "Simone D.",
+      "credits": 245
+    },
+    {
+      "id": "seed-atl-2",
+      "name": "Wesley C.",
+      "credits": 245
+    },
+    {
+      "id": "seed-atl-3",
+      "name": "Imani G.",
+      "credits": 245
+    },
+    {
+      "id": "seed-atl-4",
+      "name": "Rafael V.",
+      "credits": 245
+    },
+    {
+      "id": "seed-atl-5",
+      "name": "Hannah E.",
+      "credits": 245
+    },
+    {
+      "id": "seed-atl-6",
+      "name": "Jamal N.",
+      "credits": 245
+    },
+    {
+      "id": "seed-den-1",
+      "name": "Sierra W.",
+      "credits": 245
+    },
+    {
+      "id": "seed-den-2",
+      "name": "Mateo R.",
+      "credits": 245
+    },
+    {
+      "id": "seed-den-3",
+      "name": "Ingrid L.",
+      "credits": 245
+    },
+    {
+      "id": "seed-den-4",
+      "name": "Cody B.",
+      "credits": 245
+    },
+    {
+      "id": "seed-den-5",
+      "name": "Anjali P.",
+      "credits": 245
+    },
+    {
+      "id": "seed-den-6",
+      "name": "Tobias K.",
+      "credits": 245
+    },
+    {
+      "id": "seed-lax-1",
+      "name": "Camila S.",
+      "credits": 245
+    },
+    {
+      "id": "seed-lax-2",
+      "name": "Kenji M.",
+      "credits": 245
+    },
+    {
+      "id": "seed-lax-3",
+      "name": "Rosa A.",
+      "credits": 245
+    },
+    {
+      "id": "seed-lax-4",
+      "name": "Ethan Z.",
+      "credits": 245
+    },
+    {
+      "id": "seed-lax-5",
+      "name": "Leilani K.",
+      "credits": 245
+    },
+    {
+      "id": "seed-lax-6",
+      "name": "Omar H.",
+      "credits": 245
+    },
+    {
+      "id": "seed-mco-1",
+      "name": "Brianna T.",
+      "credits": 245
+    },
+    {
+      "id": "seed-mco-2",
+      "name": "Luis G.",
+      "credits": 245
+    },
+    {
+      "id": "seed-mco-3",
+      "name": "Fatima Z.",
+      "credits": 245
+    },
+    {
+      "id": "seed-mco-4",
+      "name": "Colton R.",
+      "credits": 245
+    },
+    {
+      "id": "seed-mco-5",
+      "name": "Mei L.",
+      "credits": 245
+    },
+    {
+      "id": "seed-mco-6",
+      "name": "Andre W.",
+      "credits": 245
+    },
+    {
+      "id": "seed-sea-1",
+      "name": "Astrid N.",
+      "credits": 245
+    },
+    {
+      "id": "seed-sea-2",
+      "name": "Rohan D.",
+      "credits": 245
+    },
+    {
+      "id": "seed-sea-3",
+      "name": "Cheyenne B.",
+      "credits": 245
+    },
+    {
+      "id": "seed-sea-4",
+      "name": "Felix M.",
+      "credits": 245
+    },
+    {
+      "id": "seed-sea-5",
+      "name": "Soo-jin P.",
+      "credits": 245
+    },
+    {
+      "id": "seed-sea-6",
+      "name": "Nathaniel G.",
+      "credits": 245
+    },
+    {
+      "id": "seed-jfk-1",
+      "name": "Gabriela C.",
+      "credits": 245
+    },
+    {
+      "id": "seed-jfk-2",
+      "name": "Isaac F.",
+      "credits": 245
+    },
+    {
+      "id": "seed-jfk-3",
+      "name": "Zainab O.",
+      "credits": 245
+    },
+    {
+      "id": "seed-jfk-4",
+      "name": "Dmitri V.",
+      "credits": 245
+    },
+    {
+      "id": "seed-jfk-5",
+      "name": "Renee J.",
+      "credits": 245
+    },
+    {
+      "id": "seed-jfk-6",
+      "name": "Theo B.",
+      "credits": 245
+    }
+  ],
+  "cars": [
+    {
+      "id": "seed-car-dtw-1",
+      "ownerId": "seed-dtw-1",
+      "airport": "DTW",
+      "model": "2022 Ford F-150 XLT SuperCrew",
+      "seats": 6,
+      "from": "2026-11-12",
+      "to": "2026-11-24",
+      "pin": {
+        "lat": 42.20675,
+        "lng": -83.3559
+      },
+      "spot": "L5-C19",
+      "photo": "/cars/ford-f-series-fourteenth-generation.png"
+    },
+    {
+      "id": "seed-car-dtw-2",
+      "ownerId": "seed-dtw-2",
+      "airport": "DTW",
+      "model": "2022 Chevrolet Traverse LT",
+      "seats": 8,
+      "from": "2026-11-13",
+      "to": "2026-11-29",
+      "pin": {
+        "lat": 42.207,
+        "lng": -83.3559
+      },
+      "spot": "L5-C14",
+      "photo": "/cars/chevrolet-traverse.png"
+    },
+    {
+      "id": "seed-car-dtw-3",
+      "ownerId": "seed-dtw-3",
+      "airport": "DTW",
+      "model": "2021 Jeep Cherokee Trailhawk",
+      "seats": 5,
+      "from": "2026-11-11",
+      "to": "2026-12-02",
+      "pin": {
+        "lat": 42.20725,
+        "lng": -83.3559
+      },
+      "spot": "L6-A07",
+      "photo": "/cars/jeep-cherokee-kl.png"
+    },
+    {
+      "id": "seed-car-dtw-4",
+      "ownerId": "seed-dtw-4",
+      "airport": "DTW",
+      "model": "2024 Chevrolet Equinox EV 2LT",
+      "seats": 5,
+      "from": "2026-11-21",
+      "to": "2026-11-30",
+      "pin": {
+        "lat": 42.20675,
+        "lng": -83.3556
+      },
+      "spot": "L7-B23",
+      "photo": "/cars/chevrolet-equinox-ev.png"
+    },
+    {
+      "id": "seed-car-dtw-5",
+      "ownerId": "seed-dtw-5",
+      "airport": "DTW",
+      "model": "2022 Chrysler Pacifica Touring",
+      "seats": 7,
+      "from": "2026-12-17",
+      "to": "2027-01-03",
+      "pin": {
+        "lat": 42.207,
+        "lng": -83.3556
+      },
+      "spot": "L5-C18",
+      "photo": "/cars/chrysler-pacifica-minivan.png"
+    },
+    {
+      "id": "seed-car-dtw-6",
+      "ownerId": "seed-dtw-6",
+      "airport": "DTW",
+      "model": "2019 Chevrolet Malibu LT",
+      "seats": 5,
+      "from": "2026-11-14",
+      "to": "2026-12-12",
+      "pin": {
+        "lat": 42.20725,
+        "lng": -83.3556
+      },
+      "spot": "L5-C17",
+      "photo": "/cars/chevrolet-malibu.png"
+    },
+    {
+      "id": "seed-car-dtw-7",
+      "ownerId": "seed-dtw-7",
+      "airport": "DTW",
+      "model": "2021 Ford Bronco Big Bend 4-Door",
+      "seats": 5,
+      "from": "2026-12-19",
+      "to": "2026-12-30",
+      "pin": {
+        "lat": 42.20675,
+        "lng": -83.3553
+      },
+      "spot": "L3-B07",
+      "photo": "/cars/ford-bronco.png"
+    },
+    {
+      "id": "seed-car-dtw-8",
+      "ownerId": "seed-dtw-8",
+      "airport": "DTW",
+      "model": "2021 Ford Explorer XLT",
+      "seats": 7,
+      "from": "2026-11-13",
+      "to": "2026-11-23",
+      "pin": {
+        "lat": 42.207,
+        "lng": -83.3553
+      },
+      "spot": "L6-B11",
+      "photo": "/cars/ford-explorer-sixth-generation.png"
+    },
+    {
+      "id": "seed-car-ord-1",
+      "ownerId": "seed-ord-1",
+      "airport": "ORD",
+      "model": "2021 Subaru Legacy Premium",
+      "seats": 5,
+      "from": "2026-11-11",
+      "to": "2026-11-25",
+      "pin": {
+        "lat": 41.97805,
+        "lng": -87.9037
+      },
+      "spot": "L3-D18",
+      "photo": "/cars/subaru-legacy.png"
+    },
+    {
+      "id": "seed-car-ord-2",
+      "ownerId": "seed-ord-2",
+      "airport": "ORD",
+      "model": "2022 Toyota Highlander XLE",
+      "seats": 8,
+      "from": "2026-11-12",
+      "to": "2026-11-30",
+      "pin": {
+        "lat": 41.9783,
+        "lng": -87.9037
+      },
+      "spot": "L4-D18",
+      "photo": "/cars/toyota-highlander.png"
+    },
+    {
+      "id": "seed-car-ord-3",
+      "ownerId": "seed-ord-3",
+      "airport": "ORD",
+      "model": "2022 Honda HR-V EX",
+      "seats": 5,
+      "from": "2026-11-10",
+      "to": "2026-12-03",
+      "pin": {
+        "lat": 41.97855,
+        "lng": -87.9037
+      },
+      "spot": "L4-D15",
+      "photo": "/cars/honda-hr-v.png"
+    },
+    {
+      "id": "seed-car-ord-4",
+      "ownerId": "seed-ord-4",
+      "airport": "ORD",
+      "model": "2023 Toyota Prius LE",
+      "seats": 5,
+      "from": "2026-11-20",
+      "to": "2026-12-01",
+      "pin": {
+        "lat": 41.97805,
+        "lng": -87.9034
+      },
+      "spot": "L5-C09",
+      "photo": "/cars/toyota-prius.png"
+    },
+    {
+      "id": "seed-car-ord-5",
+      "ownerId": "seed-ord-5",
+      "airport": "ORD",
+      "model": "2023 Ford F-150 XLT SuperCrew",
+      "seats": 5,
+      "from": "2026-12-16",
+      "to": "2027-01-04",
+      "pin": {
+        "lat": 41.9783,
+        "lng": -87.9034
+      },
+      "spot": "L5-C21",
+      "photo": "/cars/ford-f-series-fourteenth-generation.png"
+    },
+    {
+      "id": "seed-car-ord-6",
+      "ownerId": "seed-ord-6",
+      "airport": "ORD",
+      "model": "2022 Honda Odyssey EX-L",
+      "seats": 8,
+      "from": "2026-11-13",
+      "to": "2026-12-13",
+      "pin": {
+        "lat": 41.97855,
+        "lng": -87.9034
+      },
+      "spot": "L2-B07",
+      "photo": "/cars/honda-odyssey-north-america.png"
+    },
+    {
+      "id": "seed-car-atl-1",
+      "ownerId": "seed-atl-1",
+      "airport": "ATL",
+      "model": "2023 Toyota Camry LE",
+      "seats": 5,
+      "from": "2026-11-10",
+      "to": "2026-11-26",
+      "pin": {
+        "lat": 33.638818,
+        "lng": -84.448406
+      },
+      "spot": "L4-D17",
+      "photo": "/cars/toyota-camry.png"
+    },
+    {
+      "id": "seed-car-atl-2",
+      "ownerId": "seed-atl-2",
+      "airport": "ATL",
+      "model": "2022 Honda Pilot EX-L",
+      "seats": 8,
+      "from": "2026-11-11",
+      "to": "2026-12-01",
+      "pin": {
+        "lat": 33.639068,
+        "lng": -84.448406
+      },
+      "spot": "L3-B12",
+      "photo": "/cars/honda-pilot.png"
+    },
+    {
+      "id": "seed-car-atl-3",
+      "ownerId": "seed-atl-3",
+      "airport": "ATL",
+      "model": "2021 Ford F-150 XLT SuperCrew",
+      "seats": 6,
+      "from": "2026-11-09",
+      "to": "2026-12-04",
+      "pin": {
+        "lat": 33.639318,
+        "lng": -84.448406
+      },
+      "spot": "L5-F08",
+      "photo": "/cars/ford-f-series-fourteenth-generation.png"
+    },
+    {
+      "id": "seed-car-atl-4",
+      "ownerId": "seed-atl-4",
+      "airport": "ATL",
+      "model": "2022 Toyota RAV4 Hybrid XLE",
+      "seats": 5,
+      "from": "2026-11-19",
+      "to": "2026-12-02",
+      "pin": {
+        "lat": 33.638818,
+        "lng": -84.448106
+      },
+      "spot": "L2-C14",
+      "photo": "/cars/toyota-rav4.png"
+    },
+    {
+      "id": "seed-car-atl-5",
+      "ownerId": "seed-atl-5",
+      "airport": "ATL",
+      "model": "2021 Mazda CX-30 Select",
+      "seats": 5,
+      "from": "2026-12-15",
+      "to": "2027-01-05",
+      "pin": {
+        "lat": 33.639068,
+        "lng": -84.448106
+      },
+      "spot": "L6-E23",
+      "photo": "/cars/mazda-cx-30.png"
+    },
+    {
+      "id": "seed-car-atl-6",
+      "ownerId": "seed-atl-6",
+      "airport": "ATL",
+      "model": "2023 Honda CR-V EX",
+      "seats": 5,
+      "from": "2026-11-12",
+      "to": "2026-12-14",
+      "pin": {
+        "lat": 33.639318,
+        "lng": -84.448106
+      },
+      "spot": "L2-C09",
+      "photo": "/cars/honda-cr-v-sixth-generation.png"
+    },
+    {
+      "id": "seed-car-den-1",
+      "ownerId": "seed-den-1",
+      "airport": "DEN",
+      "model": "2022 Subaru Outback Wilderness",
+      "seats": 5,
+      "from": "2026-11-12",
+      "to": "2026-11-24",
+      "pin": {
+        "lat": 39.84865,
+        "lng": -104.6768
+      },
+      "spot": "L2 Row K",
+      "photo": "/cars/subaru-outback.png"
+    },
+    {
+      "id": "seed-car-den-2",
+      "ownerId": "seed-den-2",
+      "airport": "DEN",
+      "model": "2020 Subaru Forester Sport",
+      "seats": 5,
+      "from": "2026-11-13",
+      "to": "2026-11-29",
+      "pin": {
+        "lat": 39.8489,
+        "lng": -104.6768
+      },
+      "spot": "L4 Row C",
+      "photo": "/cars/subaru-forester.png"
+    },
+    {
+      "id": "seed-car-den-3",
+      "ownerId": "seed-den-3",
+      "airport": "DEN",
+      "model": "2022 Toyota Tacoma TRD Off-Road",
+      "seats": 5,
+      "from": "2026-11-11",
+      "to": "2026-12-02",
+      "pin": {
+        "lat": 39.84915,
+        "lng": -104.6768
+      },
+      "spot": "L4 Row N",
+      "photo": "/cars/toyota-tacoma.png"
+    },
+    {
+      "id": "seed-car-den-4",
+      "ownerId": "seed-den-4",
+      "airport": "DEN",
+      "model": "2023 Toyota Highlander XLE AWD",
+      "seats": 8,
+      "from": "2026-11-21",
+      "to": "2026-11-30",
+      "pin": {
+        "lat": 39.84865,
+        "lng": -104.6765
+      },
+      "spot": "L2 Row C",
+      "photo": "/cars/toyota-highlander.png"
+    },
+    {
+      "id": "seed-car-den-5",
+      "ownerId": "seed-den-5",
+      "airport": "DEN",
+      "model": "2021 Subaru Crosstrek Premium",
+      "seats": 5,
+      "from": "2026-12-17",
+      "to": "2027-01-03",
+      "pin": {
+        "lat": 39.8489,
+        "lng": -104.6765
+      },
+      "spot": "L3 Row G",
+      "photo": "/cars/subaru-crosstrek.png"
+    },
+    {
+      "id": "seed-car-den-6",
+      "ownerId": "seed-den-6",
+      "airport": "DEN",
+      "model": "2023 Toyota RAV4 Hybrid XLE",
+      "seats": 5,
+      "from": "2026-11-14",
+      "to": "2026-12-12",
+      "pin": {
+        "lat": 39.84915,
+        "lng": -104.6765
+      },
+      "spot": "L3 Row K",
+      "photo": "/cars/toyota-rav4.png"
+    },
+    {
+      "id": "seed-car-lax-1",
+      "ownerId": "seed-lax-1",
+      "airport": "LAX",
+      "model": "2023 Tesla Model 3",
+      "seats": 5,
+      "from": "2026-11-11",
+      "to": "2026-11-25",
+      "pin": {
+        "lat": 33.944017,
+        "lng": -118.407482
+      },
+      "spot": "L3-C18",
+      "photo": "/cars/tesla-model-3.png"
+    },
+    {
+      "id": "seed-car-lax-2",
+      "ownerId": "seed-lax-2",
+      "airport": "LAX",
+      "model": "2022 Toyota Prius LE",
+      "seats": 5,
+      "from": "2026-11-12",
+      "to": "2026-11-30",
+      "pin": {
+        "lat": 33.944267,
+        "lng": -118.407482
+      },
+      "spot": "L2-B11",
+      "photo": "/cars/toyota-prius.png"
+    },
+    {
+      "id": "seed-car-lax-3",
+      "ownerId": "seed-lax-3",
+      "airport": "LAX",
+      "model": "2022 Ford Mustang EcoBoost Convertible",
+      "seats": 4,
+      "from": "2026-11-10",
+      "to": "2026-12-03",
+      "pin": {
+        "lat": 33.944517,
+        "lng": -118.407482
+      },
+      "spot": "L3-E09",
+      "photo": "/cars/ford-mustang-sixth-generation.png"
+    },
+    {
+      "id": "seed-car-lax-4",
+      "ownerId": "seed-lax-4",
+      "airport": "LAX",
+      "model": "2022 Honda Civic Hatchback Sport",
+      "seats": 5,
+      "from": "2026-11-20",
+      "to": "2026-12-01",
+      "pin": {
+        "lat": 33.944017,
+        "lng": -118.407182
+      },
+      "spot": "L2-B14",
+      "photo": "/cars/honda-civic-eleventh-generation.png"
+    },
+    {
+      "id": "seed-car-lax-5",
+      "ownerId": "seed-lax-5",
+      "airport": "LAX",
+      "model": "2023 Toyota Camry XLE",
+      "seats": 5,
+      "from": "2026-12-16",
+      "to": "2027-01-04",
+      "pin": {
+        "lat": 33.944267,
+        "lng": -118.407182
+      },
+      "spot": "L4-C18",
+      "photo": "/cars/toyota-camry.png"
+    },
+    {
+      "id": "seed-car-lax-6",
+      "ownerId": "seed-lax-6",
+      "airport": "LAX",
+      "model": "2022 Toyota RAV4 XLE",
+      "seats": 5,
+      "from": "2026-11-13",
+      "to": "2026-12-13",
+      "pin": {
+        "lat": 33.944517,
+        "lng": -118.407182
+      },
+      "spot": "L2-F11",
+      "photo": "/cars/toyota-rav4.png"
+    },
+    {
+      "id": "seed-car-mco-1",
+      "ownerId": "seed-mco-1",
+      "airport": "MCO",
+      "model": "2022 Honda Odyssey EX-L",
+      "seats": 8,
+      "from": "2026-11-10",
+      "to": "2026-11-26",
+      "pin": {
+        "lat": 28.43305,
+        "lng": -81.3086
+      },
+      "spot": "L3-D-17",
+      "photo": "/cars/honda-odyssey-north-america.png"
+    },
+    {
+      "id": "seed-car-mco-2",
+      "ownerId": "seed-mco-2",
+      "airport": "MCO",
+      "model": "2021 Toyota Highlander XLE",
+      "seats": 8,
+      "from": "2026-11-11",
+      "to": "2026-12-01",
+      "pin": {
+        "lat": 28.4333,
+        "lng": -81.3086
+      },
+      "spot": "L2-C-09",
+      "photo": "/cars/toyota-highlander.png"
+    },
+    {
+      "id": "seed-car-mco-3",
+      "ownerId": "seed-mco-3",
+      "airport": "MCO",
+      "model": "2023 Ford Mustang EcoBoost Convertible",
+      "seats": 4,
+      "from": "2026-11-11",
+      "to": "2026-12-03",
+      "pin": {
+        "lat": 28.43355,
+        "lng": -81.3086
+      },
+      "spot": "L2-B-11",
+      "photo": "/cars/ford-mustang-sixth-generation.png"
+    },
+    {
+      "id": "seed-car-mco-4",
+      "ownerId": "seed-mco-4",
+      "airport": "MCO",
+      "model": "2021 Toyota Camry SE",
+      "seats": 5,
+      "from": "2026-11-19",
+      "to": "2026-12-02",
+      "pin": {
+        "lat": 28.43305,
+        "lng": -81.3083
+      },
+      "spot": "L2-B-09",
+      "photo": "/cars/toyota-camry.png"
+    },
+    {
+      "id": "seed-car-mco-5",
+      "ownerId": "seed-mco-5",
+      "airport": "MCO",
+      "model": "2023 Mazda CX-5 2.5 S Preferred",
+      "seats": 5,
+      "from": "2026-12-15",
+      "to": "2027-01-05",
+      "pin": {
+        "lat": 28.4333,
+        "lng": -81.3083
+      },
+      "spot": "L1-E-21",
+      "photo": "/cars/mazda-cx-5.png"
+    },
+    {
+      "id": "seed-car-mco-6",
+      "ownerId": "seed-mco-6",
+      "airport": "MCO",
+      "model": "2022 Toyota Prius LE",
+      "seats": 5,
+      "from": "2026-11-12",
+      "to": "2026-12-14",
+      "pin": {
+        "lat": 28.43355,
+        "lng": -81.3083
+      },
+      "spot": "L4-F-22",
+      "photo": "/cars/toyota-prius.png"
+    },
+    {
+      "id": "seed-car-sea-1",
+      "ownerId": "seed-sea-1",
+      "airport": "SEA",
+      "model": "2021 Subaru Outback Premium",
+      "seats": 5,
+      "from": "2026-11-12",
+      "to": "2026-11-24",
+      "pin": {
+        "lat": 47.443032,
+        "lng": -122.299542
+      },
+      "spot": "L6 Row H",
+      "photo": "/cars/subaru-outback.png"
+    },
+    {
+      "id": "seed-car-sea-2",
+      "ownerId": "seed-sea-2",
+      "airport": "SEA",
+      "model": "2022 Chevrolet Bolt EV 2LT",
+      "seats": 5,
+      "from": "2026-11-13",
+      "to": "2026-11-29",
+      "pin": {
+        "lat": 47.443282,
+        "lng": -122.299542
+      },
+      "spot": "L6 Row K",
+      "photo": "/cars/chevrolet-bolt-euv.png"
+    },
+    {
+      "id": "seed-car-sea-3",
+      "ownerId": "seed-sea-3",
+      "airport": "SEA",
+      "model": "2023 Toyota RAV4 Hybrid XLE",
+      "seats": 5,
+      "from": "2026-11-11",
+      "to": "2026-12-02",
+      "pin": {
+        "lat": 47.443532,
+        "lng": -122.299542
+      },
+      "spot": "L2 Row D",
+      "photo": "/cars/toyota-rav4.png"
+    },
+    {
+      "id": "seed-car-sea-4",
+      "ownerId": "seed-sea-4",
+      "airport": "SEA",
+      "model": "2021 Subaru Forester Premium",
+      "seats": 5,
+      "from": "2026-11-21",
+      "to": "2026-11-30",
+      "pin": {
+        "lat": 47.443032,
+        "lng": -122.299242
+      },
+      "spot": "L3 Row F",
+      "photo": "/cars/subaru-forester.png"
+    },
+    {
+      "id": "seed-car-sea-5",
+      "ownerId": "seed-sea-5",
+      "airport": "SEA",
+      "model": "2021 Ford F-150 XLT SuperCrew",
+      "seats": 6,
+      "from": "2026-12-17",
+      "to": "2027-01-03",
+      "pin": {
+        "lat": 47.443282,
+        "lng": -122.299242
+      },
+      "spot": "L3 Row H",
+      "photo": "/cars/ford-f-series-fourteenth-generation.png"
+    },
+    {
+      "id": "seed-car-sea-6",
+      "ownerId": "seed-sea-6",
+      "airport": "SEA",
+      "model": "2019 Honda Civic Sport Hatchback",
+      "seats": 5,
+      "from": "2026-11-14",
+      "to": "2026-12-12",
+      "pin": {
+        "lat": 47.443532,
+        "lng": -122.299242
+      },
+      "spot": "L7 Row E",
+      "photo": "/cars/honda-civic-tenth-generation.png"
+    },
+    {
+      "id": "seed-car-jfk-1",
+      "ownerId": "seed-jfk-1",
+      "airport": "JFK",
+      "model": "2022 Honda Civic EX Sedan",
+      "seats": 5,
+      "from": "2026-11-11",
+      "to": "2026-11-25",
+      "pin": {
+        "lat": 40.645386,
+        "lng": -73.781639
+      },
+      "spot": "B3-D11",
+      "photo": "/cars/honda-civic-eleventh-generation.png"
+    },
+    {
+      "id": "seed-car-jfk-2",
+      "ownerId": "seed-jfk-2",
+      "airport": "JFK",
+      "model": "2023 Toyota Camry Hybrid LE",
+      "seats": 5,
+      "from": "2026-11-12",
+      "to": "2026-11-30",
+      "pin": {
+        "lat": 40.645636,
+        "lng": -73.781639
+      },
+      "spot": "B2-C14",
+      "photo": "/cars/toyota-camry.png"
+    },
+    {
+      "id": "seed-car-jfk-3",
+      "ownerId": "seed-jfk-3",
+      "airport": "JFK",
+      "model": "2022 Toyota RAV4 XLE",
+      "seats": 5,
+      "from": "2026-11-10",
+      "to": "2026-12-03",
+      "pin": {
+        "lat": 40.645886,
+        "lng": -73.781639
+      },
+      "spot": "B3-D18",
+      "photo": "/cars/toyota-rav4.png"
+    },
+    {
+      "id": "seed-car-jfk-4",
+      "ownerId": "seed-jfk-4",
+      "airport": "JFK",
+      "model": "2023 Honda Odyssey EX-L",
+      "seats": 8,
+      "from": "2026-11-20",
+      "to": "2026-12-01",
+      "pin": {
+        "lat": 40.645386,
+        "lng": -73.781339
+      },
+      "spot": "B2-E09",
+      "photo": "/cars/honda-odyssey-north-america.png"
+    },
+    {
+      "id": "seed-car-jfk-5",
+      "ownerId": "seed-jfk-5",
+      "airport": "JFK",
+      "model": "2023 Hyundai Sonata SEL",
+      "seats": 5,
+      "from": "2026-12-16",
+      "to": "2027-01-04",
+      "pin": {
+        "lat": 40.645636,
+        "lng": -73.781339
+      },
+      "spot": "B4-A22",
+      "photo": "/cars/hyundai-sonata.png"
+    },
+    {
+      "id": "seed-car-jfk-6",
+      "ownerId": "seed-jfk-6",
+      "airport": "JFK",
+      "model": "2021 Mazda CX-30 Select",
+      "seats": 5,
+      "from": "2026-11-13",
+      "to": "2026-12-13",
+      "pin": {
+        "lat": 40.645886,
+        "lng": -73.781339
+      },
+      "spot": "B3-F07",
+      "photo": "/cars/mazda-cx-30.png"
+    }
+  ]
+}

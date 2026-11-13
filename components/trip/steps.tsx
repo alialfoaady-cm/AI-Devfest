@@ -11,7 +11,8 @@ import { lockerCode } from "@/lib/inspections";
 import { SAMPLE_PICKUP_PHOTOS, SAMPLE_RETURN_PHOTOS } from "@/lib/sampleData";
 import { act, useTask } from "@/lib/store";
 import { SLOT_LABELS, SLOTS, type InspectionResult, type Photos, type Slot } from "@/lib/types";
-import { Notice, btnPrimary, btnQuiet, heading } from "../ui";
+import { LockOpen } from "@phosphor-icons/react";
+import { Notice, btnPrimary, btnQuiet, card, cardLabel, heading } from "../ui";
 import { PhotoSet, type SlotStatus } from "./PhotoSet";
 
 /** True while the AI is the mock: only then are the drawn sample photos offered, to try the flow without a car. */
@@ -64,17 +65,18 @@ export function PickupPhotos({ bookingId }: { bookingId: string }) {
 export function KeyCode({ bookingId }: { bookingId: string }) {
   const code = lockerCode(bookingId);
   return (
-    <section aria-labelledby="key-heading" className="rounded-xl bg-surface p-5 sm:p-6">
-      <h2 id="key-heading" className={heading}>
+    <section aria-labelledby="key-heading" className={`${card} p-4 sm:p-5`}>
+      <h2 id="key-heading" className={`${cardLabel} text-green-ink`}>
+        <LockOpen size={20} weight="fill" aria-hidden />
         Key locker code
       </h2>
-      <p className="mt-3 flex gap-2" aria-label={`Code ${code.split("").join(" ")}`}>
+      <p className="mt-3 flex gap-2.5" aria-label={`Code ${code.split("").join(" ")}`}>
         {code.split("").map((digit, index) => (
           <span
             key={index}
             aria-hidden
             style={{ "--i": index } as React.CSSProperties}
-            className="enter flex h-16 w-13 items-center justify-center rounded-lg bg-ink text-4xl font-bold tabular-nums text-canvas"
+            className="enter flex h-18 w-14.5 items-center justify-center rounded-xl border border-green-ink/40 bg-surface-2 text-[2.75rem] font-bold tabular-nums text-green-ink"
           >
             {digit}
           </span>
@@ -162,7 +164,7 @@ export function ReturnCheck({ bookingId, pickupPhotos }: { bookingId: string; pi
 /** The dollar figure for judges. Its inputs are estimates and the screen says so. */
 export function Savings({ days }: { days: number }) {
   return (
-    <section aria-label="Impact" className="rounded-xl bg-green p-5 text-on-green sm:p-6">
+    <section aria-label="Impact" className="rounded-2xl bg-green p-5 text-on-green sm:p-6">
       <p className="text-5xl font-bold leading-none tracking-tight tabular-nums">${days * RENTAL_COST_PER_DAY_USD_ESTIMATE}</p>
       <p className="mt-1.5 text-lg font-semibold">{IMPACT_LABEL}</p>
       <p>

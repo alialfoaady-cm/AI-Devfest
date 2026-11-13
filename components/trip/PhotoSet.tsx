@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- photos are data URLs or local samples; next/image adds nothing */
 
-import { Camera } from "@phosphor-icons/react";
+import { Camera, CheckCircle } from "@phosphor-icons/react";
 import { useState } from "react";
 import { fileToPhoto } from "@/lib/inspection/images";
 import type { Verdict } from "@/lib/inspection/verdict";
@@ -44,8 +44,8 @@ export function PhotoSet({
           return (
             <li key={slot}>
               <label
-                className={`relative block aspect-[4/3] overflow-hidden rounded-lg border bg-surface [container-type:size] has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink ${
-                  photo ? "border-transparent" : "border-dashed border-ink-soft"
+                className={`relative block aspect-[4/3] overflow-hidden rounded-xl border bg-surface-2 [container-type:size] has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink ${
+                  photo ? "border-green-ink/60" : "border-dashed border-ink-soft/60"
                 } ${status ? "" : "cursor-pointer"} ${verdict ? VERDICT[verdict].border : ""}`}
               >
                 {photo ? (
@@ -56,12 +56,13 @@ export function PhotoSet({
                   />
                 ) : (
                   <span className="flex size-full flex-col items-center justify-center gap-1 text-center">
-                    <Camera size={26} className="text-ink-soft" aria-hidden />
+                    <Camera size={26} weight="fill" className="text-green-ink" aria-hidden />
                     <span className="font-medium">{SLOT_LABELS[slot]}</span>
                   </span>
                 )}
                 {photo && (
-                  <span className="absolute left-1.5 top-1.5 rounded-full bg-black/70 px-2.5 py-0.5 text-sm font-medium text-white">
+                  <span className="absolute left-1.5 top-1.5 flex items-center gap-1 rounded-full bg-green py-0.5 pl-1.5 pr-2.5 text-sm font-semibold text-on-green">
+                    <CheckCircle size={16} weight="fill" aria-hidden />
                     {SLOT_LABELS[slot]}
                   </span>
                 )}

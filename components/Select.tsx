@@ -8,6 +8,7 @@
 
 import { CaretDown, Check } from "@phosphor-icons/react";
 import { useEffect, useId, useRef, useState } from "react";
+import { segmentLabel, segmentShape } from "./ui";
 
 export type SelectOption = { value: string; label: string; tag?: string };
 
@@ -15,14 +16,14 @@ const LOOK = {
   /** A form field with its label above. */
   field: {
     label: "block font-medium",
-    button: "mt-1.5 flex h-14 w-full items-center gap-2 rounded-lg bg-surface px-4 text-left",
+    button: "mt-1.5 flex h-14 w-full items-center gap-2 rounded-xl bg-surface-2 px-4 text-left",
     value: "flex min-w-0 flex-1 items-center gap-2",
   },
   /** One part of a `searchBar`: the whole segment is the button. */
   segment: {
-    label: "block text-xs font-medium leading-4 text-ink-soft",
-    button: "block w-full rounded-[inherit] px-4 py-2 text-left transition-colors duration-150 hover:bg-surface aria-expanded:bg-surface",
-    value: "flex h-6 items-center gap-2",
+    label: segmentLabel,
+    button: `block w-full rounded-[inherit] ${segmentShape} hover:bg-surface-2 aria-expanded:bg-canvas aria-expanded:shadow-[0_3px_12px_rgb(0_0_0/0.12),0_1px_2px_rgb(0_0_0/0.1)]`,
+    value: "flex h-5 items-center gap-2 text-sm text-ink-soft",
   },
 };
 
@@ -161,7 +162,7 @@ export function Select({
           aria-labelledby={`${id}-label`}
           // Keep focus on the button while an option is pressed, so the keyboard keeps working after a click.
           onMouseDown={(event) => event.preventDefault()}
-          className={`pop absolute top-full z-20 mt-2 max-h-72 w-max min-w-full max-w-[calc(100vw-2rem)] overflow-auto rounded-xl border border-ink bg-canvas p-1.5 ${
+          className={`pop absolute top-full z-20 mt-3 max-h-80 w-max min-w-full max-w-[calc(100vw-2rem)] overflow-auto rounded-3xl border border-line bg-surface p-2 shadow-[0_8px_28px_rgb(0_0_0/0.28)] ${
             align === "end" ? "right-0 origin-top-right" : "left-0 origin-top-left"
           }`}
         >
@@ -173,12 +174,12 @@ export function Select({
               aria-selected={index === selected}
               onClick={() => choose(index)}
               onPointerMove={() => setActive(index)}
-              className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-lg px-2 ${index === active ? "bg-surface" : ""}`}
+              className={`flex min-h-16 cursor-pointer items-center gap-3 rounded-2xl px-2 ${index === active ? "bg-surface-2" : ""}`}
             >
               {option.tag && (
                 <span
-                  className={`grid h-8 w-14 shrink-0 place-items-center rounded-md text-sm font-bold tracking-wider transition-colors duration-150 ${
-                    index === selected ? "bg-green text-on-green" : "bg-surface-2"
+                  className={`grid size-12 shrink-0 place-items-center rounded-xl text-sm font-bold tracking-wider transition-colors duration-150 ${
+                    index === selected ? "bg-green text-on-green" : "bg-line"
                   }`}
                 >
                   {option.tag}

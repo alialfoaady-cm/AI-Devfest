@@ -1,4 +1,5 @@
 // Pure state changes for the photo check. Booking rules stay in lib/rules.ts.
+import { kmDriven } from "./inspection/verdict";
 import { returnCar } from "./rules";
 import type { Inspection, InspectionResult, OwnerDecision, Photos, Slot, State } from "./types";
 
@@ -8,6 +9,7 @@ export function findInspection(state: State, bookingId: string, phase: Inspectio
 
 export function savePickup(state: State, bookingId: string, photos: Photos): State {
   if (findInspection(state, bookingId, "pickup")) throw new Error("Pickup photos are already saved.");
+  if (state.bookings.find((b) => b.id === bookingId)?.status === "cancelled") throw new Error("This trip was cancelled.");
   return {
     ...state,
     inspections: [
@@ -17,7 +19,10 @@ export function savePickup(state: State, bookingId: string, photos: Photos): Sta
   };
 }
 
-/** Saves the return photos with the AI's flags, then returns the car, which pays the owner. */
+/**
+ * Saves the return photos with the AI's flags, then returns the car, which pays the owner:
+ * the days, plus any miles past the allowance, measured from the two dashboard readings.
+ */
 export function saveReturn(
   state: State,
   bookingId: string,
@@ -26,7 +31,7 @@ export function saveReturn(
   aiProvider: string,
 ): State {
   if (!findInspection(state, bookingId, "pickup")) throw new Error("Take the pickup photos first.");
-  const returned = returnCar(state, bookingId);
+  const returned = returnCar(state, bookingId, kmDriven(aiResult.dashboard));
   return {
     ...returned,
     inspections: [
@@ -59,7 +64,8 @@ export function lockerCode(bookingId: string): string {
 }
 
 /** Where a booking is in the demo flow, which decides the next thing its borrower does. */
-export function tripStage(state: State, bookingId: string): "pickup" | "driving" | "returned" {
-  if (state.bookings.find((b) => b.id === bookingId)?.status === "returned") return "returned";
+export function tripStage(state: State, bookingId: string): "pickup" | "driving" | "returned" | "cancelled" {
+  const status = state.bookings.find((b) => b.id === bookingId)?.status;
+  if (status === "returned" || status === "cancelled") return status;
   return findInspection(state, bookingId, "pickup") ? "driving" : "pickup";
 }
