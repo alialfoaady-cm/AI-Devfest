@@ -2,6 +2,7 @@
 // checks the input, and then runs the same pure rules as before (lib/rules.ts, lib/cars.ts,
 // lib/inspections.ts). Nothing here trusts a user id, a date or a photo sent by the browser.
 import { listCar, setParking } from "../cars";
+import { conversation, sendMessage } from "../chat";
 import { parseInspectionResult } from "../inspection/validate";
 import { decideFinding, savePickup, saveReturn } from "../inspections";
 import { book, cancelBooking, insureTrip } from "../rules";
@@ -91,6 +92,9 @@ const HANDLERS: Record<string, Handler> = {
     return saveReturn(state, booking.id, await sixPhotos(payload.photos), results, inspectionProvider());
   },
 
+  // The time comes from the server's clock, never from the browser.
+  sendMessage: (state, me, payload) => sendMessage(state, me, text(payload.bookingId), text(payload.text), new Date().toISOString()),
+
   decideFinding: (state, me, payload) => {
     const inspection = state.inspections.find((i) => i.id === payload.inspectionId);
     const booking = state.bookings.find((b) => b.id === inspection?.bookingId);
@@ -114,7 +118,7 @@ export function applyAction(state: State, me: string, type: unknown, payload: Pa
 /**
  * The part of the data one user is allowed to see. Everyone sees which cars exist and when they are
  * booked (the search needs that). Where a car is parked is only for its owner and people who booked it;
- * photos and flags are only for the two people on that trip; nobody sees another person's balance.
+ * photos, flags and messages are only for the two people on that trip; nobody sees another person's balance.
  */
 export function viewFor(state: State, me: string): State {
   // Not signed in ("" for me): enough to browse cars and see which days are taken, and nothing about people
@@ -126,6 +130,7 @@ export function viewFor(state: State, me: string): State {
       cars: state.cars.map((car) => ({ ...car, pin: undefined, spot: undefined })),
       bookings: state.bookings.map(({ id, carId, from, to, days, status }) => ({ id, carId, from, to, days, status, userId: "" })),
       inspections: [],
+      messages: [],
     };
   }
   const mine = (carId: string) => state.cars.some((car) => car.id === carId && car.ownerId === me);
@@ -139,5 +144,6 @@ export function viewFor(state: State, me: string): State {
       const booking = state.bookings.find((b) => b.id === inspection.bookingId);
       return booking !== undefined && (booking.userId === me || mine(booking.carId));
     }),
+    messages: (state.messages ?? []).filter((message) => conversation(state, me, message.bookingId)),
   };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Key, MagnifyingGlass, Moon, Path, ShieldCheck, SignOut, Sun } from "@phosphor-icons/react";
+import { ChatCircle, Key, MagnifyingGlass, Moon, Path, ShieldCheck, SignOut, Sun } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { plural } from "@/lib/format";
@@ -13,12 +13,13 @@ const TABS = [
   { href: "/trips", label: "Trips", short: "Trips", Icon: Path, match: (path: string) => path.startsWith("/trips") },
   { href: "/lend", label: "Lend my car", short: "Lend", Icon: Key, match: (path: string) => path.startsWith("/lend") },
   { href: "/insurance", label: "Insurance", short: "Insure", Icon: ShieldCheck, match: (path: string) => path.startsWith("/insurance") },
+  { href: "/chat", label: "Chat", short: "Chat", Icon: ChatCircle, match: (path: string) => path.startsWith("/chat") },
 ];
 
 const roundButton = "grid size-10 place-items-center rounded-full text-ink-soft transition-colors duration-150 hover:bg-surface hover:text-ink";
 
 /**
- * The top bar: name on the left, the four sections in the middle, the account on the right.
+ * The top bar: name on the left, the five sections in the middle, the account on the right.
  * On phones the sections move to a tab bar at the bottom. Anyone can open every section; the
  * sign-in window opens when a visitor tries to book, list a car or do anything else that changes data.
  */
@@ -86,7 +87,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="col-start-3 flex items-center gap-1.5 justify-self-end">
             {me && (
               <>
-                <span className="max-w-32 truncate text-sm font-medium text-ink-soft max-sm:hidden">{me.name}</span>
+                {/* From lg up only: with five sections there is no room for it on a tablet. */}
+                <span className="max-w-32 truncate text-sm font-medium text-ink-soft max-lg:hidden">{me.name}</span>
                 <p className="mx-1.5 rounded-full bg-green px-3 py-1.5 text-sm font-semibold tabular-nums text-on-green" aria-live="polite">
                   {plural(me.credits, "credit")}
                 </p>
@@ -139,7 +141,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {ready && !me && <AuthDialog />}
 
       <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-canvas md:hidden">
-        <ul className="grid grid-cols-4 pb-[env(safe-area-inset-bottom)]">
+        <ul className="grid grid-cols-5 pb-[env(safe-area-inset-bottom)]">
           {TABS.map(({ href, short, Icon, match }) => {
             const active = match(pathname);
             return (

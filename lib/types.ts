@@ -93,9 +93,14 @@ export type Inspection = {
   ownerDecision: Record<string, OwnerDecision>;
 };
 
+/** One chat message on a trip, between its borrower and the car's owner. `at` is an ISO time set by the server. */
+export type Message = { id: string; bookingId: string; from: string; text: string; at: string };
+
 export type State = {
   users: User[];
   cars: Car[];
   bookings: Booking[];
   inspections: Inspection[];
+  /** Optional so data files written before chat existed still load. */
+  messages?: Message[];
 };
