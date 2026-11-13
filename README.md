@@ -154,7 +154,7 @@ npm test         # booking rules, inspection checks, and who may do and see what
   - `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`: the Google Maps key. It is meant for the browser, so it is the one variable with the `NEXT_PUBLIC_` prefix. Without it the map loads with Google's "for development purposes only" notice.
   - `INSPECTION_PROVIDER=mock` or `watsonx`, and the IBM variables. Never give these the `NEXT_PUBLIC_` prefix, or the key reaches the browser.
 - **Two devices, or in front of judges:** use the production build, `npm run build` then `npm start -- -H 0.0.0.0`, and open `http://<laptop-ip>:3000` on the phone. Both see the same cars and trips, because the data is on the laptop. The dev server refuses to load the app for any host other than `localhost`.
-- **Start over:** stop the server and delete the `.data` folder. There are no built-in users or cars: create an account, list a car, then sign in as someone else to borrow it. New accounts start with 245 credits, a first week (`STARTING_CREDITS` in `lib/config.ts`).
+- **Start over:** stop the server and delete the `.data` folder. A new data file starts with 50 demo listings at 8 US airports (`lib/seed/listings.json`, photos in `public/cars/`, credits in `public/cars/CREDITS.md`); their made-up owners have no accounts. Create an account to borrow one, or list your own car and sign in as someone else to borrow it. New accounts start with 245 credits, a first week (`STARTING_CREDITS` in `lib/config.ts`).
 - **Sample photos:** drawn placeholders in `public/samples`, made by `node scripts/make-samples.mjs`, offered on the photo steps only while the AI is the mock.
 
 ### How the photo check is wired
