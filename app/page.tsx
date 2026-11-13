@@ -17,6 +17,8 @@ import { act, useStore, useTask } from "@/lib/store";
 import type { Car } from "@/lib/types";
 
 const WHERE = [{ value: "", label: "Any airport", tag: "All" }, ...AIRPORT_OPTIONS];
+// The sizes cars come in: two-seaters, small cars, five-seaters and seven-seaters.
+const SEATS = [{ value: "1", label: "Any number" }, ...[2, 4, 5, 7].map((n) => ({ value: String(n), label: `${n} or more` }))];
 
 /**
  * The front door, open to everyone: search, then rows of cars. Picking a car opens the booking
@@ -25,7 +27,7 @@ const WHERE = [{ value: "", label: "Any airport", tag: "All" }, ...AIRPORT_OPTIO
 export default function FindPage() {
   const { state, currentUserId } = useStore();
   const router = useRouter();
-  const [search, setSearch] = useState(() => ({ airport: "", from: isoDay(1), to: isoDay(8) }));
+  const [search, setSearch] = useState(() => ({ airport: "", seats: "1", from: isoDay(1), to: isoDay(8) }));
   const [picked, setPicked] = useState<Car | null>(null);
   const [useCredits, setUseCredits] = useState(true);
   const { busy, error, run, clearError } = useTask();
@@ -42,7 +44,10 @@ export default function FindPage() {
 
   // No airport chosen: one row for each airport that has cars. One chosen: all of its cars.
   const rows = (search.airport ? [search.airport] : Object.keys(AIRPORTS))
-    .map((code) => ({ code, cars: validTrip ? availableCars(state, code, search.from, search.to, currentUserId ?? "") : [] }))
+    .map((code) => ({
+      code,
+      cars: validTrip ? availableCars(state, code, search.from, search.to, currentUserId ?? "").filter((car) => car.seats >= Number(search.seats)) : [],
+    }))
     .filter((row) => row.cars.length > 0);
 
   useEffect(() => {
@@ -66,7 +71,7 @@ export default function FindPage() {
         <p className="mx-auto mt-2 max-w-xl text-center text-ink-soft">Land, unlock, drive. Pay with credits you earned lending your own car.</p>
 
         <form
-          className={`${searchBar} mx-auto mt-6 max-w-3xl sm:grid-cols-[1fr_2fr_auto]`}
+          className={`${searchBar} mx-auto mt-6 max-w-3xl sm:grid-cols-[1.1fr_0.9fr_2fr_auto]`}
           onSubmit={(event) => {
             event.preventDefault();
             (document.activeElement as HTMLElement | null)?.blur();
@@ -74,6 +79,7 @@ export default function FindPage() {
           }}
         >
           <Select variant="segment" label="Where" value={search.airport} options={WHERE} onChange={(airport) => setSearch({ ...search, airport })} />
+          <Select variant="segment" label="Seats" value={search.seats} options={SEATS} onChange={(seats) => setSearch({ ...search, seats })} />
           <DateRange calendarClass="max-sm:mt-19" labels={["Pick up", "Return"]} from={search.from} to={search.to} onChange={(from, to) => setSearch({ ...search, from, to })} />
           {/* A circle until the bar is in use, then it opens out to say what it does. */}
           <button
@@ -173,7 +179,7 @@ export default function FindPage() {
                 </Link>
               }
             >
-              Try other dates. If you park at the airport when you fly, your car could be the first.
+              {search.seats === "1" ? "Try other dates." : "Try other dates or fewer seats."} If you park at the airport when you fly, your car could be the first.
             </Empty>
           )}
         </div>

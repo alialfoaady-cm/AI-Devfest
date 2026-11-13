@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { openAuth } from "@/components/AuthForm";
 import { CarPhotoPicker } from "@/components/CarPhotoPicker";
 import { DateRange } from "@/components/DateRange";
 import { Select } from "@/components/Select";
@@ -24,6 +25,7 @@ export default function ListCarPage() {
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
+    if (!currentUserId) return openAuth(); // a visitor can fill the form in; signing in keeps what they typed
     const next = await run(() => act("listCar", { car: { ...car, photo } }));
     const mine = next?.cars.filter((c) => c.ownerId === currentUserId).at(-1);
     if (mine) router.push(`/lend/${mine.id}/spot`);

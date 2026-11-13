@@ -130,7 +130,7 @@ returnCar(state, bookingId)                      // marks it returned, pays the 
 |---|---|---|
 | App | Next.js (App Router), TypeScript, Tailwind CSS. One repo: the pages and the server routes live together | Built |
 | Accounts | Email and password. Passwords are stored as salted scrypt hashes; the browser holds a random session token in an httpOnly cookie (`lib/server/auth.ts`) | Built |
-| Browsing | Anyone can open Find a car without an account and see the cars, their photos and the days they are free. Booking, lending and trips need an account. A visitor is never sent a parking spot, a trip photo or anyone's name beyond an owner's first name (`viewFor` in `lib/server/actions.ts`) | Built |
+| Browsing | Anyone can open every section without an account and see the cars, their photos and the days they are free. Pressing Book or listing a car opens the sign-in window; the server refuses every change from a visitor. A visitor is never sent a parking spot, a trip photo or anyone's name beyond an owner's first name (`viewFor` in `lib/server/actions.ts`) | Built |
 | Data | One JSON file on the server, `.data/sayara.json`, plus uploaded photos in `.data/photos/` (`lib/server/db.ts`). Every phone and laptop that opens the site shares it | Built. A file on one machine's disk: fine for one server, not for serverless hosting |
 | Changes | The browser never edits data. It posts an action to `/api/action`; the server checks who is signed in and what they sent, then runs the pure rules (`lib/server/actions.ts`) | Built |
 | Privacy | `/api/state` sends each user only what they may see: a car's pin and spot number only to its owner and to people who booked it, trip photos only to the two people on that trip, nobody else's balance | Built |
