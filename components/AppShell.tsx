@@ -39,7 +39,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <header className="sticky top-0 z-30 border-b border-line bg-canvas">
         <div className="mx-auto grid h-16 max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 sm:px-6 md:h-20 lg:px-16">
-          <Link href="/" className="flex h-11 items-center justify-self-start text-2xl font-extrabold tracking-tight text-green-ink">
+          <Link href="/" className="flex h-11 items-center gap-2 justify-self-start text-2xl font-extrabold tracking-tight text-green-ink">
+            {/* Same drawing as app/icon.svg, in the wordmark's colour. */}
+            <svg viewBox="0 0 64 64" className="size-8 shrink-0" aria-hidden>
+              <mask id="logo-s">
+                <circle cx="32" cy="32" r="32" fill="#fff" />
+                <path d="M86.05-8.33L28.09 7.2A11 11 0 0 0 24.63 26.84L39.37 37.16A11 11 0 0 1 35.91 56.8L-22.05 72.33" fill="none" stroke="#000" strokeWidth="12" />
+              </mask>
+              <circle cx="32" cy="32" r="32" fill="currentColor" mask="url(#logo-s)" />
+            </svg>
             Sayara
           </Link>
 
