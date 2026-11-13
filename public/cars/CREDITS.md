@@ -32,3 +32,11 @@ Each file's author and licence are on its Commons page.
 - `toyota-prius.png`: https://commons.wikimedia.org/wiki/File:Toyota_Prius_2.0_HEV_Limited_(V)_–_f_18112022.jpg
 - `toyota-rav4.png`: https://commons.wikimedia.org/wiki/File:2024_Toyota_RAV4_Prime_XSE_Premium_in_Silver_Sky_with_Midnight_Black_roof,_front_left.jpg
 - `toyota-tacoma.png`: https://commons.wikimedia.org/wiki/File:Toyota_Tacoma_(N300)_TRD_1X7A2438.jpg
+
+## Garage backdrops
+
+Softened (blurred and dimmed) with Core Image, 1280 px. Each is licensed as listed; authors are on the Commons page.
+
+- `garage-1.jpg` (CC BY-SA 4.0): https://commons.wikimedia.org/wiki/File:Interior_of_Multi-storey_car_park_at_Skygate,_Brisbane.jpg
+- `garage-2.jpg` (CC BY-SA 4.0): https://commons.wikimedia.org/wiki/File:Interior_of_Rupert_Street_parking_garage_-_DSC_8051.jpg
+- `garage-3.jpg` (CC BY-SA 4.0): https://commons.wikimedia.org/wiki/File:Seattle_U_-_interior_of_Broadway_parking_garage.jpg
