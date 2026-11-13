@@ -1,20 +1,19 @@
 "use client";
 
-import { Camera } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { CarPhoto, carPhoto, Notice, Segment, btnPrimary, btnQuiet, field, pageTitle, searchBar, segmentControl } from "@/components/ui";
-import { AIRPORTS } from "@/lib/config";
+import { CarPhotoPicker } from "@/components/CarPhotoPicker";
+import { Select } from "@/components/Select";
+import { Notice, Segment, btnPrimary, field, pageTitle, searchBar, segmentControl } from "@/components/ui";
+import { AIRPORT_OPTIONS } from "@/lib/config";
 import { isoDay } from "@/lib/format";
-import { fileToPhoto } from "@/lib/inspection/images";
 import { act, useStore, useTask } from "@/lib/store";
 
 export default function ListCarPage() {
   const { currentUserId } = useStore();
   const router = useRouter();
-  const [car, setCar] = useState(() => ({ model: "", seats: 5, airport: Object.keys(AIRPORTS)[0], from: isoDay(1), to: isoDay(8) }));
+  const [car, setCar] = useState(() => ({ model: "", seats: 5, airport: AIRPORT_OPTIONS[0].value, from: isoDay(1), to: isoDay(8) }));
   const [photo, setPhoto] = useState<string>();
-  const [photoError, setPhotoError] = useState("");
   const { busy, error, run, clearError } = useTask();
 
   function change(next: Partial<typeof car>) {
@@ -64,16 +63,7 @@ export default function ListCarPage() {
                 onChange={(event) => change({ seats: Number(event.target.value) })}
               />
             </label>
-            <label className="font-medium">
-              Parked at
-              <select className={field} value={car.airport} onChange={(event) => change({ airport: event.target.value })}>
-                {Object.entries(AIRPORTS).map(([code, name]) => (
-                  <option key={code} value={code}>
-                    {name} ({code})
-                  </option>
-                ))}
-              </select>
-            </label>
+            <Select label="Parked at" align="end" value={car.airport} options={AIRPORT_OPTIONS} onChange={(airport) => change({ airport })} />
           </div>
           <div>
             <div className={searchBar}>
@@ -86,7 +76,7 @@ export default function ListCarPage() {
             </div>
             <p className="mt-2 text-sm text-ink-soft">Nobody can book past the day you land. The car is back before you are.</p>
           </div>
-          <Notice>{error || photoError}</Notice>
+          <Notice>{error}</Notice>
           <button type="submit" className={`${btnPrimary} w-full sm:w-auto`} disabled={busy}>
             {busy ? "Listing your car" : "List car and drop the pin"}
           </button>
@@ -94,26 +84,7 @@ export default function ListCarPage() {
       </div>
 
       <div className="max-lg:order-first">
-        <CarPhoto photo={photo} model={car.model || "Your car"} className={carPhoto} />
-        <label className={`${btnQuiet} mt-3 w-full cursor-pointer has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink`}>
-          <Camera size={20} aria-hidden />
-          {photo ? "Change photo" : "Add a photo of your car"}
-          <input
-            type="file"
-            accept="image/*"
-            className="sr-only"
-            onChange={async (event) => {
-              const file = event.target.files?.[0];
-              if (!file) return;
-              try {
-                setPhotoError("");
-                setPhoto(await fileToPhoto(file));
-              } catch {
-                setPhotoError("That photo could not be read. Try another one.");
-              }
-            }}
-          />
-        </label>
+        <CarPhotoPicker photo={photo} model={car.model || "Your car"} onChange={setPhoto} />
         <p className="mt-2 text-sm text-ink-soft">Borrowers pick a car they can see. A photo from the front corner works best.</p>
       </div>
     </section>

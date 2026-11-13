@@ -18,15 +18,18 @@ export function toJpeg(draw: (ctx: CanvasRenderingContext2D) => void, width: num
   return canvas.toDataURL("image/jpeg", 0.82);
 }
 
-/** A camera or gallery file, shrunk to at most STORED_PHOTO_EDGE_PX on its long edge, as a JPEG data URL. */
+/** Anything drawable (an image, a live video frame), shrunk to at most STORED_PHOTO_EDGE_PX on its long edge, as a JPEG data URL. */
+export function shrinkToPhoto(source: CanvasImageSource, width: number, height: number): string {
+  const scale = Math.min(1, STORED_PHOTO_EDGE_PX / Math.max(width, height));
+  return toJpeg((ctx) => ctx.drawImage(source, 0, 0, width * scale, height * scale), width * scale, height * scale);
+}
+
+/** A camera or gallery file as a stored photo. */
 export async function fileToPhoto(file: File): Promise<string> {
   const url = URL.createObjectURL(file);
   try {
     const image = await loadImage(url);
-    const scale = Math.min(1, STORED_PHOTO_EDGE_PX / Math.max(image.naturalWidth, image.naturalHeight));
-    const width = image.naturalWidth * scale;
-    const height = image.naturalHeight * scale;
-    return toJpeg((ctx) => ctx.drawImage(image, 0, 0, width, height), width, height);
+    return shrinkToPhoto(image, image.naturalWidth, image.naturalHeight);
   } finally {
     URL.revokeObjectURL(url);
   }
