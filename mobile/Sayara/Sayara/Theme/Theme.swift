@@ -24,32 +24,72 @@ extension Color {
     }
 }
 
-/// Solid green, black text. The main action on a screen.
+extension Theme {
+    /// iOS 26 Liquid Glass on every button. Set to false for the flat look (solid green, grey outline).
+    static let liquidGlass = true
+}
+
+/// The main action on a screen: green. With Liquid Glass it is green-tinted glass.
 struct PrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
+        let label = configuration.label
             .font(.headline)
             .foregroundStyle(Theme.onGreen)
             .frame(maxWidth: .infinity, minHeight: 52)
-            .background(Theme.green.opacity(isEnabled ? 1 : 0.3), in: RoundedRectangle(cornerRadius: 8))
-            .scaleEffect(configuration.isPressed ? 0.98 : 1)
-            .opacity(configuration.isPressed ? 0.85 : 1)
+        if Theme.liquidGlass {
+            label
+                .glassEffect(.regular.tint(Theme.green.opacity(isEnabled ? 0.9 : 0.3)).interactive(), in: Capsule())
+                .overlay(Capsule().strokeBorder(GlassRim.gradient, lineWidth: 1))
+                .opacity(isEnabled ? 1 : 0.6)
+        } else {
+            label
+                .background(Theme.green.opacity(isEnabled ? 1 : 0.3), in: RoundedRectangle(cornerRadius: 8))
+                .scaleEffect(configuration.isPressed ? 0.98 : 1)
+                .opacity(configuration.isPressed ? 0.85 : 1)
+        }
     }
 }
 
-/// Green outline. Second actions such as "Use sample photos".
+/// Second actions such as "Use sample photos". With Liquid Glass it is clear glass.
 struct SecondaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
+        let label = configuration.label
             .font(.headline)
             .foregroundStyle(Theme.text.opacity(isEnabled ? 1 : 0.4))
             .frame(maxWidth: .infinity, minHeight: 48)
-            .background(configuration.isPressed ? Theme.surfaceRaised : Theme.surface, in: RoundedRectangle(cornerRadius: 8))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.line, lineWidth: 1))
+        if Theme.liquidGlass {
+            label
+                .glassEffect(.regular.tint(.white.opacity(isEnabled ? 0.10 : 0.04)).interactive(), in: Capsule())
+                .overlay(Capsule().strokeBorder(GlassRim.gradient, lineWidth: 1))
+        } else {
+            label
+                .background(configuration.isPressed ? Theme.surfaceRaised : Theme.surface, in: RoundedRectangle(cornerRadius: 8))
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.line, lineWidth: 1))
+        }
+    }
+}
+
+/// The bright edge along the top of a glass button, fading out towards the bottom.
+enum GlassRim {
+    static let gradient = LinearGradient(colors: [.white.opacity(0.45), .white.opacity(0.08), .white.opacity(0.2)],
+                                         startPoint: .top, endPoint: .bottom)
+}
+
+/// A faint green glow on the black page, so Liquid Glass has something to refract. Only drawn with glass on.
+struct GlassBackdrop: View {
+    var body: some View {
+        ZStack {
+            Theme.background
+            if Theme.liquidGlass {
+                RadialGradient(colors: [Theme.green.opacity(0.22), .clear], center: .topTrailing, startRadius: 0, endRadius: 420)
+                RadialGradient(colors: [Color(hex: 0x1F6BDC).opacity(0.16), .clear], center: .bottomLeading, startRadius: 0, endRadius: 460)
+            }
+        }
+        .ignoresSafeArea()
     }
 }
 
@@ -127,7 +167,7 @@ struct Screen<Content: View>: View {
                 .padding(.bottom, 24)
         }
         .scrollDismissesKeyboard(.interactively)
-        .background(Theme.background.ignoresSafeArea())
+        .background(GlassBackdrop())
     }
 }
 

@@ -156,12 +156,19 @@ struct CancelTripSheet: View {
 /// Red, for the one action that cannot be undone.
 struct DangerButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
+        let label = configuration.label
             .font(.headline)
             .foregroundStyle(.black)
             .frame(maxWidth: .infinity, minHeight: 52)
-            .background(Theme.flag, in: RoundedRectangle(cornerRadius: 8))
-            .opacity(configuration.isPressed ? 0.85 : 1)
+        if Theme.liquidGlass {
+            label
+                .glassEffect(.regular.tint(Theme.flag.opacity(0.9)).interactive(), in: Capsule())
+                .overlay(Capsule().strokeBorder(GlassRim.gradient, lineWidth: 1))
+        } else {
+            label
+                .background(Theme.flag, in: RoundedRectangle(cornerRadius: 8))
+                .opacity(configuration.isPressed ? 0.85 : 1)
+        }
     }
 }
 
