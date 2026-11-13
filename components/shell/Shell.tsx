@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { plural } from "@/lib/format";
-import { resetToSampleData, setCurrentUser, useStore } from "@/lib/store";
+import { resetToSampleData, setCurrentUser, useHydrated, useStore } from "@/lib/store";
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const { state, currentUserId } = useStore();
   const router = useRouter();
+  const hydrated = useHydrated(); // saved state is only known in the browser
   const me = state.users.find((u) => u.id === currentUserId) ?? state.users[0];
 
   return (
@@ -37,7 +38,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
         <div className="bg-ink text-white">
-          <p className="mx-auto flex max-w-3xl items-baseline justify-between px-4 py-1.5">
+          <p className={`mx-auto flex max-w-3xl items-baseline justify-between px-4 py-1.5 ${hydrated ? "" : "invisible"}`}>
             <span>{me.name}</span>
             <span className="font-display text-2xl font-semibold tabular-nums" aria-live="polite">
               {plural(me.credits, "credit")}
@@ -46,7 +47,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">{children}</main>
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">{hydrated && children}</main>
 
       <footer className="mx-auto w-full max-w-3xl px-4 pb-8 text-ink-soft">
         <button

@@ -69,3 +69,12 @@ export function setCurrentUser(currentUserId: string) {
 export function resetToSampleData() {
   write(SEED);
 }
+
+/** False during server render and hydration, so screens can wait for the saved state. */
+export function useHydrated(): boolean {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+}
